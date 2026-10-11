@@ -8,10 +8,10 @@
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
-  <!-- Шрифт -->
+  <!-- Шрифт Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Иконки Lucide -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -21,6 +21,7 @@
       --bg-app: #f4f7fb;
       --card-bg: #ffffff;
       --primary-blue: #0284c7;
+      --mvk-blue: #155eef;
       --text-main: #0f172a;
       --text-muted: #64748b;
       --border-color: #e2e8f0;
@@ -54,10 +55,10 @@
       padding-bottom: calc(75px + var(--safe-area-bottom));
       display: flex;
       flex-direction: column;
-      box-shadow: 0 0 30px rgba(0,0,0,0.05);
+      box-shadow: 0 0 35px rgba(0,0,0,0.06);
     }
 
-    /* Экраны */
+    /* Экраны приложения */
     .screen {
       display: none;
       flex-direction: column;
@@ -74,7 +75,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Верхняя панель */
+    /* Верхний хедер */
     .app-header {
       padding: 16px 20px 12px;
       display: flex;
@@ -104,12 +105,12 @@
     .header-back-btn { left: 16px; }
     .header-more-btn { right: 16px; color: var(--text-muted); }
 
-    /* Селектор объектов (мульти-аккаунт) */
+    /* Переключатель мульти-аккаунта */
     .account-switcher-wrap {
       margin: 0 16px 12px;
       background: #ffffff;
       border-radius: 14px;
-      padding: 6px 14px;
+      padding: 7px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -129,7 +130,7 @@
       font-family: inherit;
     }
 
-    /* Баннер отключения воды */
+    /* Предупреждение об отключении воды 25 октября 2026 года */
     .outage-alert-banner {
       margin: 0 16px 14px;
       background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
@@ -168,20 +169,10 @@
       margin-bottom: 4px;
     }
 
-    .outage-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #9a3412;
-      margin-bottom: 2px;
-    }
+    .outage-title { font-size: 14px; font-weight: 700; color: #9a3412; margin-bottom: 2px; }
+    .outage-desc { font-size: 12px; color: #c2410c; line-height: 1.35; }
 
-    .outage-desc {
-      font-size: 12px;
-      color: #c2410c;
-      line-height: 1.35;
-    }
-
-    /* Карточки и разделы */
+    /* Баннер срока показаний */
     .reminder-banner {
       background: #ffffff;
       border-radius: 16px;
@@ -224,6 +215,7 @@
       white-space: nowrap;
     }
 
+    /* Карточка счёта (Главная) */
     .section-title-row {
       display: flex;
       justify-content: space-between;
@@ -231,11 +223,7 @@
       padding: 4px 20px 10px;
     }
 
-    .section-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #0f172a;
-    }
+    .section-title { font-size: 16px; font-weight: 700; color: #0f172a; }
 
     .account-card {
       background: #ffffff;
@@ -301,7 +289,7 @@
       justify-content: center;
     }
 
-    /* Нижняя навигация */
+    /* Навигационная панель (Таббар) */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -335,22 +323,35 @@
 
     .nav-item.active { color: #0284c7; font-weight: 600; }
 
+    /* Центральная круглая кнопка с логотипом Мосводоканала */
     .nav-center-bubble {
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: #0284c7;
-      color: #ffffff;
+      background: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
-      border: 3px solid #ffffff;
-      margin-top: -14px;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+      border: 3px solid #0ea5e9;
+      margin-top: -16px;
       cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.15s ease;
+      padding: 6px;
     }
 
-    /* Экран формы */
+    .nav-center-bubble:active {
+      transform: scale(0.92);
+    }
+
+    .nav-center-bubble svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Карточки форм */
     .form-group-card {
       background: #ffffff;
       margin: 0 16px 16px;
@@ -423,13 +424,15 @@
       justify-content: center;
       color: #64748b;
       cursor: pointer;
+      transition: background 0.15s;
     }
+    .info-btn:active { background: #e2e8f0; }
 
     .meter-values-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .meter-digits-box { display: flex; gap: 4px; }
@@ -451,6 +454,40 @@
     .consumption-label { font-size: 11px; color: #94a3b8; }
     .consumption-value { font-size: 18px; font-weight: 700; color: #94a3b8; }
 
+    /* Поле прямого ввода показаний цифрами */
+    .manual-meter-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+      border-radius: 12px;
+      padding: 8px 12px;
+    }
+
+    .manual-meter-input-row label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      white-space: nowrap;
+    }
+
+    .manual-meter-input {
+      flex: 1;
+      height: 38px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      outline: none;
+      text-align: right;
+    }
+    .manual-meter-input:focus { border-color: #0284c7; }
+
     .step-buttons-row {
       display: flex;
       gap: 10px;
@@ -469,7 +506,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
     }
 
     .anomaly-badge {
@@ -514,9 +550,7 @@
     .bill-field-lbl { font-size: 11px; color: #94a3b8; margin-bottom: 2px; }
     .bill-field-val { font-size: 14px; font-weight: 600; color: #0f172a; }
 
-    /* ========================================= */
-    /* ВЕРСТКА ПРОФИЛЯ И ВКЛАДОК (ИСПРАВЛЕННАЯ)   */
-    /* ========================================= */
+    /* Горизонтальный таббар Профиля */
     .history-tabs-container {
       width: 100%;
       border-bottom: 1px solid #e2e8f0;
@@ -562,7 +596,7 @@
       border-radius: 3px 3px 0 0;
     }
 
-    /* Изоляция контента вкладок */
+    /* Изоляция вкладок */
     .tab-content {
       display: none !important;
       width: 100%;
@@ -654,7 +688,6 @@
     }
     .history-item:last-child { border-bottom: none; }
 
-    /* Кнопка записи на выезд мастера */
     .master-order-btn {
       width: calc(100% - 32px);
       margin: 0 16px 16px;
@@ -672,7 +705,7 @@
       gap: 8px;
     }
 
-    /* Чат бот */
+    /* Чат-бот */
     .bot-screen-container {
       background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
       min-height: calc(100vh - 75px);
@@ -732,7 +765,7 @@
       cursor: pointer;
     }
 
-    /* Модалки */
+    /* Модальные окна с крестиком закрытия (✕) */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -753,12 +786,37 @@
       max-width: 360px;
       width: 100%;
       text-align: center;
+      position: relative;
       animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes modalPop {
       from { transform: scale(0.92); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Кнопка-крестик в правом верхнем углу */
+    .modal-close-x {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      z-index: 5;
+    }
+
+    .modal-close-x:active {
+      background: #e2e8f0;
+      transform: scale(0.9);
     }
 
     .modal-icon {
@@ -822,7 +880,7 @@
         <h1>Главная</h1>
       </div>
 
-      <!-- Мультиаккаунт (Селектор объектов) -->
+      <!-- Селектор объектов -->
       <div class="account-switcher-wrap">
         <select class="account-select" id="accountSelector" onchange="switchAccount(this.value)">
           <option value="home">🏠 Квартира (ул. Добрякова, д. 1, кв. 1)</option>
@@ -832,7 +890,7 @@
         <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: #94a3b8;"></i>
       </div>
 
-      <!-- Баннер отключения воды 25 октября 2026 -->
+      <!-- Оповещение об отключении воды 25 октября 2026 -->
       <div class="outage-alert-banner" onclick="openOutageModal()">
         <div class="outage-icon-box">
           <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
@@ -844,7 +902,7 @@
         </div>
       </div>
 
-      <!-- Напоминание и передача -->
+      <!-- Срок передачи показаний -->
       <div class="reminder-banner">
         <div class="reminder-left">
           <div class="meter-circle-icon">
@@ -865,7 +923,7 @@
         <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: #94a3b8;"></i>
       </div>
 
-      <!-- Карточка счёта -->
+      <!-- Карточка счёта на Главной -->
       <div class="account-card" onclick="goToScreen('screen-form')">
         <div class="account-card-header">
           <div class="account-name" id="homeAccountTitle">Дом</div>
@@ -890,7 +948,6 @@
         </div>
       </div>
 
-      <!-- Раздел Другое -->
       <div class="section-title-row">
         <div class="section-title">Другое</div>
       </div>
@@ -1009,6 +1066,13 @@
           </div>
         </div>
 
+        <!-- Поле прямого ввода цифр -->
+        <div class="manual-meter-input-row">
+          <label>Ввести показание вручную:</label>
+          <input type="number" id="manualInputCold" class="manual-meter-input" value="134" oninput="handleManualMeterInput('cold', this.value)">
+          <span style="font-size: 12px; color: #64748b; font-weight: 600;">м³</span>
+        </div>
+
         <div class="step-buttons-row">
           <button class="step-btn" onclick="adjustMeterVal('cold', -1)">-1 м³</button>
           <button class="step-btn" onclick="adjustMeterVal('cold', +1)">+1 м³</button>
@@ -1039,6 +1103,13 @@
           </div>
         </div>
 
+        <!-- Поле прямого ввода цифр -->
+        <div class="manual-meter-input-row">
+          <label>Ввести показание вручную:</label>
+          <input type="number" id="manualInputHot" class="manual-meter-input" value="98" oninput="handleManualMeterInput('hot', this.value)">
+          <span style="font-size: 12px; color: #64748b; font-weight: 600;">м³</span>
+        </div>
+
         <div class="step-buttons-row">
           <button class="step-btn" onclick="adjustMeterVal('hot', -1)">-1 м³</button>
           <button class="step-btn" onclick="adjustMeterVal('hot', +1)">+1 м³</button>
@@ -1066,7 +1137,6 @@
         <h1>Оплата</h1>
       </div>
 
-      <!-- Ввод показаний в оплате -->
       <div class="form-group-card">
         <div style="font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
           <i data-lucide="droplets" style="width: 18px; height: 18px; color: #0284c7;"></i>
@@ -1084,7 +1154,7 @@
         </div>
       </div>
 
-      <!-- Выбор способа оплаты: СБП, СберПэй, Т-Пэй -->
+      <!-- Выбор способов: СБП, СберПэй, Т-Пэй -->
       <div class="form-group-card">
         <div style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">Способ оплаты</div>
         <div class="payment-method-selector">
@@ -1111,7 +1181,6 @@
         </div>
       </div>
 
-      <!-- Реквизиты договора -->
       <div class="form-group-card">
         <div class="bill-field">
           <div class="bill-field-lbl">№ лицевого счета</div>
@@ -1138,7 +1207,7 @@
 
 
     <!-- ========================================== -->
-    <!-- 5. ЭКРАН: ПРОФИЛЬ (ИСПРАВЛЕННЫЙ)           -->
+    <!-- 5. ЭКРАН: ПРОФИЛЬ                          -->
     <!-- ========================================== -->
     <div id="screen-history" class="screen">
       <div class="app-header">
@@ -1149,7 +1218,7 @@
         <button class="header-more-btn">•••</button>
       </div>
 
-      <!-- ГОРИЗОНТАЛЬНЫЙ ТАББАР ПРОФИЛЯ -->
+      <!-- Горизонтальный таббар Профиля -->
       <div class="history-tabs-container">
         <div class="history-tabs">
           <div class="tab-item" id="tab-btn-benefits" onclick="switchProfileTab('benefits')">Льготы</div>
@@ -1158,7 +1227,7 @@
         </div>
       </div>
 
-      <!-- 1. ВКЛАДКА: ЛЬГОТЫ (Пенсионерские 50% ЖКУ) -->
+      <!-- Вкладка: ЛЬГОТЫ -->
       <div id="tab-content-benefits" class="tab-content">
         <div class="pensioner-benefit-card">
           <div class="benefit-header-row">
@@ -1197,7 +1266,7 @@
         </div>
       </div>
 
-      <!-- 2. ВКЛАДКА: ЗАЯВКИ И ВЫЗОВ МАСТЕРА -->
+      <!-- Вкладка: ЗАЯВКИ -->
       <div id="tab-content-requests" class="tab-content">
         <div class="form-group-card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -1208,14 +1277,13 @@
           <div style="font-size: 11px; color: #94a3b8;">Подана: 15.09.2023 • Срок ответа до 5 рабочих дней</div>
         </div>
 
-        <!-- Кнопка вызова мастера (исправлена вёрстка) -->
         <button class="master-order-btn" onclick="openMasterModal()">
           <i data-lucide="wrench" style="width: 18px; height: 18px;"></i>
           Записаться на выезд мастера
         </button>
       </div>
 
-      <!-- 3. ВКЛАДКА: ИСТОРИЯ ПОКАЗАНИЙ И ГРАФИК (СИНХРОНИЗИРОВАНА) -->
+      <!-- Вкладка: ИСТОРИЯ ПОКАЗАНИЙ -->
       <div id="tab-content-history" class="tab-content active">
         <div class="chart-box">
           <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 12px;">
@@ -1249,7 +1317,6 @@
               <div class="bar-label">Сент</div>
             </div>
 
-            <!-- Синхронизированный текущий месяц -->
             <div class="bar-group">
               <div class="bar-pair">
                 <div class="bar-cold" id="chartBarColdLive" style="height: 52px; background: #0284c7;"></div>
@@ -1261,7 +1328,6 @@
         </div>
 
         <div class="history-list">
-          <!-- Динамическая синхронизированная верхняя строка -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 12px; font-weight: 700; color: #0284c7;">Текущий период (Октябрь 2026)</span>
             <span style="font-size: 10px; background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Онлайн</span>
@@ -1286,13 +1352,17 @@
       </div>
     </div>
 
+
+    <!-- ========================================== -->
+    <!-- 6. ЭКРАН: БОТ МОСВОДОКАНАЛ                -->
+    <!-- ========================================== -->
     <div id="screen-bot" class="screen">
       <div class="bot-screen-container">
         <div class="app-header" style="background: transparent; color: #fff;">
           <button class="header-back-btn" style="color: #fff;" onclick="goToScreen('screen-home')">
             <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
           </button>
-          <h1 style="color: #fff;">Бот Калининградводоканал</h1>
+          <h1 style="color: #fff;">Бот Калининградводоканала</h1>
         </div>
 
         <div class="bot-chat-area" id="botChatArea">
@@ -1324,12 +1394,15 @@
 
 
     <!-- ========================================== -->
-    <!-- МОДАЛЬНЫЕ ОКНА                             -->
+    <!-- МОДАЛЬНЫЕ ОКНА С КРЕСТИКОМ (✕)             -->
     <!-- ========================================== -->
 
     <!-- Модалка: Отключение воды 25 октября 2026 -->
     <div id="outageModal" class="modal-overlay">
       <div class="modal-card">
+        <button class="modal-close-x" onclick="closeOutageModal()">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
         <div class="modal-icon warning">
           <i data-lucide="droplet-off" style="width: 32px; height: 32px;"></i>
         </div>
@@ -1346,6 +1419,9 @@
     <!-- Модалка: Инфо о последней отправке (ℹ️) -->
     <div id="meterInfoModal" class="modal-overlay">
       <div class="modal-card">
+        <button class="modal-close-x" onclick="closeMeterInfoModal()">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
         <div class="modal-icon info">
           <i data-lucide="calendar-check" style="width: 32px; height: 32px;"></i>
         </div>
@@ -1369,9 +1445,12 @@
       </div>
     </div>
 
-    <!-- Модалка: Запись к мастеру -->
+    <!-- Модалка: Вызов мастера с крестиком закрытия -->
     <div id="masterModal" class="modal-overlay">
       <div class="modal-card">
+        <button class="modal-close-x" onclick="closeMasterModal()">
+          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+        </button>
         <div class="modal-icon info">
           <i data-lucide="calendar" style="width: 32px; height: 32px;"></i>
         </div>
@@ -1393,7 +1472,7 @@
 
 
     <!-- ========================================== -->
-    <!-- НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ                    -->
+    <!-- НИЖНЯЯ ПАНЕЛЬ С НОВЫМ ЛОГОТИПОМ МОСВОДОКАНАЛА -->
     <!-- ========================================== -->
     <div class="bottom-nav">
       <button class="nav-item active" id="nav-home" onclick="goToScreen('screen-home')">
@@ -1406,8 +1485,58 @@
         <span>Показания</span>
       </button>
 
-      <div class="nav-center-bubble" onclick="goToScreen('screen-bot')">
-        <span style="font-size: 11px; font-weight: 800;">МВК</span>
+      <!-- Центральная кнопка: Векторный исторический логотип Мосводоканала (башня с арками и волнами) -->
+      <div class="nav-center-bubble" onclick="goToScreen('screen-bot')" title="Бот Калининградводоканала">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Шпиль и шатер -->
+          <path d="M50 14L50 20M50 14L49 20M50 14L51 20" stroke="#1058ca" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M50 20L32 29L32 35L68 35L68 29L50 20Z" fill="#1058ca"/>
+          
+          <!-- Зубчатые карнизы -->
+          <circle cx="37" cy="30" r="2.5" fill="#ffffff"/>
+          <circle cx="50" cy="27" r="2.5" fill="#ffffff"/>
+          <circle cx="63" cy="30" r="2.5" fill="#ffffff"/>
+
+          <!-- Верхний ярус башни с окнами -->
+          <rect x="32.5" y="35" width="35" height="15" fill="#1058ca"/>
+          <!-- Окна верхнего яруса (решетка) -->
+          <rect x="36" y="38" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="39.5" y="38" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="43" y="38" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="49" y="38" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="52.5" y="38" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="56" y="38" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="62" y="38" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="65" y="38" width="2" height="6.5" fill="#ffffff"/>
+          
+          <!-- Разделительный карниз -->
+          <rect x="32" y="47.5" width="36" height="2" fill="#ffffff"/>
+
+          <!-- Средний ярус башни с окнами -->
+          <rect x="32.5" y="49.5" width="35" height="15" fill="#1058ca"/>
+          <!-- Окна среднего яруса -->
+          <rect x="36" y="52" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="39.5" y="52" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="43" y="52" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="49" y="52" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="52.5" y="52" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="56" y="52" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="62" y="52" width="2" height="6.5" fill="#ffffff"/>
+          <rect x="65" y="52" width="2" height="6.5" fill="#ffffff"/>
+
+          <!-- Нижний ярус с тремя арками -->
+          <path d="M32.5 64.5H67.5V77.5H64V68.5C64 66.5 62 65 59.5 65C57 65 55 66.5 55 68.5V77.5H52V68.5C52 66.5 50 65 47.5 65C45 65 43 66.5 43 68.5V77.5H40V68.5C40 66.5 38 65 35.5 65C33 65 32.5 66.5 32.5 68.5V77.5H32.5V64.5Z" fill="#1058ca"/>
+
+          <!-- Левые волны воды -->
+          <path d="M12 66.5C15 64.5 19 64.5 22 66.5C25 68.5 29 68.5 32.5 66.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
+          <path d="M12 71.5C15 69.5 19 69.5 22 71.5C25 73.5 29 73.5 32.5 71.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
+          <path d="M12 76.5C15 74.5 19 74.5 22 76.5C25 78.5 29 78.5 32.5 76.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
+
+          <!-- Правые волны воды -->
+          <path d="M67.5 66.5C71 64.5 75 64.5 78 66.5C81 68.5 85 68.5 88 66.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
+          <path d="M67.5 71.5C71 69.5 75 69.5 78 71.5C81 73.5 85 73.5 88 71.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
+          <path d="M67.5 76.5C71 74.5 75 74.5 78 76.5C81 78.5 85 78.5 88 76.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
+        </svg>
       </div>
 
       <button class="nav-item" id="nav-pay" onclick="goToScreen('screen-pay')">
@@ -1424,7 +1553,7 @@
   </div>
 
   <script>
-    // Telegram Web App
+    // Инициализация Telegram WebApp
     const tg = window.Telegram?.WebApp;
     if (tg) {
       tg.ready();
@@ -1499,7 +1628,7 @@
       setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    // Навигация по экранам
+    // Навигация
     function goToScreen(screenId) {
       triggerHaptic('selection_change');
 
@@ -1525,18 +1654,16 @@
     function switchProfileTab(tabName) {
       triggerHaptic('selection_change');
 
-      // Кнопки табов
       document.getElementById('tab-btn-benefits').classList.toggle('active', tabName === 'benefits');
       document.getElementById('tab-btn-requests').classList.toggle('active', tabName === 'requests');
       document.getElementById('tab-btn-history').classList.toggle('active', tabName === 'history');
 
-      // Контент табов (строгая изоляция)
       document.getElementById('tab-content-benefits').classList.toggle('active', tabName === 'benefits');
       document.getElementById('tab-content-requests').classList.toggle('active', tabName === 'requests');
       document.getElementById('tab-content-history').classList.toggle('active', tabName === 'history');
     }
 
-    // Рендер барабанчиков счётчиков
+    // Барабанчики
     function renderDigits(containerId, value) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -1549,41 +1676,42 @@
       container.innerHTML = html;
     }
 
-    // Синхронизация данных
+    // Синхронизация всех представлений приложения
     function updateAllViews() {
       const acc = state.accounts[state.currentAccount];
 
-      // Барабанчики
       renderDigits('coldDigitsContainer', acc.coldVal);
       renderDigits('hotDigitsContainer', acc.hotVal);
 
-      // Расход
+      // Синхронизация полей ручного ввода
+      const manCold = document.getElementById('manualInputCold');
+      const manHot = document.getElementById('manualInputHot');
+      if (manCold && document.activeElement !== manCold) manCold.value = acc.coldVal;
+      if (manHot && document.activeElement !== manHot) manHot.value = acc.hotVal;
+
       const coldDiff = Math.max(0, acc.coldVal - acc.coldPrev);
       const hotDiff = Math.max(0, acc.hotVal - acc.hotPrev);
 
       document.getElementById('coldConsumptionDisplay').innerText = String(coldDiff).padStart(3, '0');
       document.getElementById('hotConsumptionDisplay').innerText = String(hotDiff).padStart(3, '0');
 
-      // Предупреждение об аномальном расходе
       document.getElementById('coldAnomalyBadge').style.display = coldDiff > 25 ? 'block' : 'none';
       document.getElementById('hotAnomalyBadge').style.display = hotDiff > 25 ? 'block' : 'none';
 
-      // Поля в оплате
-      document.getElementById('payInputCold').value = acc.coldVal;
-      document.getElementById('payInputHot').value = acc.hotVal;
+      const payCold = document.getElementById('payInputCold');
+      const payHot = document.getElementById('payInputHot');
+      if (payCold && document.activeElement !== payCold) payCold.value = acc.coldVal;
+      if (payHot && document.activeElement !== payHot) payHot.value = acc.hotVal;
 
-      // Сумма со скидкой 50%
       const baseSum = Math.round(((coldDiff * 50.93) + (hotDiff * 190.50) + ((coldDiff + hotDiff) * 39.97)) * 0.5);
       const totalSum = Math.max(1250, baseSum);
 
       document.getElementById('homeDueAmount').innerText = `${totalSum.toLocaleString('ru-RU')} ₽`;
       updatePayButtonText(totalSum);
 
-      // СИНХРОНИЗАЦИЯ С ИСТОРИЕЙ В ПРОФИЛЕ
       document.getElementById('historyLiveCold').innerText = `${String(acc.coldVal).padStart(5, '0')} м³`;
       document.getElementById('historyLiveHot').innerText = `${String(acc.hotVal).padStart(5, '0')} м³`;
 
-      // Динамический график
       const coldBarHeight = Math.min(80, Math.max(15, coldDiff * 3));
       const hotBarHeight = Math.min(80, Math.max(15, hotDiff * 3));
       document.getElementById('chartBarColdLive').style.height = `${coldBarHeight}px`;
@@ -1599,7 +1727,33 @@
       btn.innerText = `Оплатить ${label}: ${amount.toLocaleString('ru-RU')} ₽`;
     }
 
-    // Выбор способа оплаты
+    // Прямой ввод показаний с клавиатуры
+    function handleManualMeterInput(type, valStr) {
+      const acc = state.accounts[state.currentAccount];
+      const val = parseInt(valStr, 10);
+      if (isNaN(val)) return;
+
+      if (type === 'cold') acc.coldVal = Math.max(0, val);
+      if (type === 'hot') acc.hotVal = Math.max(0, val);
+
+      updateAllViews();
+    }
+
+    function adjustMeterVal(type, delta) {
+      triggerHaptic('light');
+      const acc = state.accounts[state.currentAccount];
+      if (type === 'cold') acc.coldVal = Math.max(acc.coldPrev, acc.coldVal + delta);
+      if (type === 'hot') acc.hotVal = Math.max(acc.hotPrev, acc.hotVal + delta);
+      updateAllViews();
+    }
+
+    function syncFromPaymentInputs() {
+      const acc = state.accounts[state.currentAccount];
+      acc.coldVal = parseInt(document.getElementById('payInputCold').value, 10) || acc.coldPrev;
+      acc.hotVal = parseInt(document.getElementById('payInputHot').value, 10) || acc.hotPrev;
+      updateAllViews();
+    }
+
     function selectPayMethod(method) {
       triggerHaptic('light');
       state.selectedPayMethod = method;
@@ -1609,24 +1763,6 @@
       updatePayButtonText();
     }
 
-    // Шаговые кнопки (+ / -)
-    function adjustMeterVal(type, delta) {
-      triggerHaptic('light');
-      const acc = state.accounts[state.currentAccount];
-      if (type === 'cold') acc.coldVal = Math.max(acc.coldPrev, acc.coldVal + delta);
-      if (type === 'hot') acc.hotVal = Math.max(acc.hotPrev, acc.hotVal + delta);
-      updateAllViews();
-    }
-
-    // Синхронизация при вводе в платежах
-    function syncFromPaymentInputs() {
-      const acc = state.accounts[state.currentAccount];
-      acc.coldVal = parseInt(document.getElementById('payInputCold').value, 10) || acc.coldPrev;
-      acc.hotVal = parseInt(document.getElementById('payInputHot').value, 10) || acc.hotPrev;
-      updateAllViews();
-    }
-
-    // Переключение мульти-аккаунта
     function switchAccount(accKey) {
       triggerHaptic('medium');
       state.currentAccount = accKey;
@@ -1643,7 +1779,6 @@
       document.getElementById('payCadastralDetail').innerText = acc.cadastral;
       document.getElementById('benefitAccountDisplay').innerText = acc.accountNumber;
 
-      // Обновляем форму
       document.getElementById('inputAddress').value = acc.address;
       document.getElementById('inputApartment').value = acc.apartment;
       document.getElementById('inputFloor').value = acc.floor;
@@ -1653,7 +1788,6 @@
       showToast(`Выбран объект: ${acc.title}`);
     }
 
-    // Сохранение данных абонента
     function saveSubscriberData() {
       triggerHaptic('success');
       const acc = state.accounts[state.currentAccount];
@@ -1695,9 +1829,13 @@
       triggerHaptic('medium');
       document.getElementById('masterModal').classList.add('active');
     }
+    function closeMasterModal() {
+      triggerHaptic('light');
+      document.getElementById('masterModal').classList.remove('active');
+    }
     function submitMasterBooking() {
       triggerHaptic('success');
-      document.getElementById('masterModal').classList.remove('active');
+      closeMasterModal();
       showToast('Заявка мастеру отправлена!');
     }
 
@@ -1748,13 +1886,13 @@
         triggerHaptic('medium');
         const botMsg = document.createElement('div');
         botMsg.className = 'msg-bubble msg-incoming';
-        botMsg.innerHTML = `Запрос по теме "${text}" обработан. Горячая линия Калининградводоканала: 8 (999) 123-45-67.<div class="msg-time">Только что</div>`;
+        botMsg.innerHTML = `Запрос "${text}" принят в работу. Горячая линия Калининградводоканала: 8 (999) 123-45-67.<div class="msg-time">Только что</div>`;
         chat.appendChild(botMsg);
         chat.scrollTop = chat.scrollHeight;
       }, 600);
     }
 
-    // Инициализация при старте
+    // Старт
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       updateAllViews();
