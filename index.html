@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Мосводоканал — Telegram Mini App</title>
+  <title>Калининградводоканал — MAX Mini App</title>
   
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -11,7 +11,7 @@
   <!-- Шрифт -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Иконки Lucide -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -20,16 +20,11 @@
     :root {
       --bg-app: #f4f7fb;
       --card-bg: #ffffff;
-      --primary-blue: #0088cc;
-      --telegram-blue: #2481cc;
-      --accent-water: #0ea5e9;
-      --text-main: #1e293b;
-      --text-muted: #8e9aa8;
+      --primary-blue: #0284c7;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
       --border-color: #e2e8f0;
-      --warning-bg: #fff8e6;
-      --warning-text: #b45309;
-      --safe-area-inset-top: env(safe-area-inset-top, 0px);
-      --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-area-bottom: env(safe-area-inset-bottom, 0px);
     }
 
     * {
@@ -41,13 +36,13 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
       background: var(--bg-app);
       color: var(--text-main);
-      overflow-x: hidden;
-      min-height: 100vh;
       display: flex;
       justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
     .app-viewport {
@@ -56,18 +51,18 @@
       min-height: 100vh;
       background: #f4f7fb;
       position: relative;
-      padding-bottom: calc(75px + var(--safe-area-inset-bottom));
-      box-shadow: 0 0 40px rgba(0,0,0,0.06);
+      padding-bottom: calc(75px + var(--safe-area-bottom));
       display: flex;
       flex-direction: column;
+      box-shadow: 0 0 30px rgba(0,0,0,0.05);
     }
 
-    /* Управление экранами */
+    /* Экраны */
     .screen {
       display: none;
       flex-direction: column;
-      animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       width: 100%;
+      animation: fadeIn 0.2s ease-out;
     }
 
     .screen.active {
@@ -75,11 +70,11 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Шапка */
+    /* Верхняя панель */
     .app-header {
       padding: 16px 20px 12px;
       display: flex;
@@ -87,40 +82,56 @@
       justify-content: center;
       position: relative;
       background: #f4f7fb;
-      z-index: 10;
     }
 
     .app-header h1 {
       font-size: 18px;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--text-main);
     }
 
-    .header-back-btn {
+    .header-back-btn, .header-more-btn {
       position: absolute;
-      left: 16px;
       background: none;
       border: none;
-      color: #0f172a;
+      color: var(--text-main);
       display: flex;
       align-items: center;
       cursor: pointer;
       padding: 6px;
     }
 
-    .header-more-btn {
-      position: absolute;
-      right: 16px;
-      background: none;
-      border: none;
-      color: #64748b;
-      cursor: pointer;
-      padding: 6px;
+    .header-back-btn { left: 16px; }
+    .header-more-btn { right: 16px; color: var(--text-muted); }
+
+    /* Селектор объектов (мульти-аккаунт) */
+    .account-switcher-wrap {
+      margin: 0 16px 12px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
     }
 
-    /* Баннер отключения воды 25 окт 2026 */
+    .account-select {
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+      width: 100%;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* Баннер отключения воды */
     .outage-alert-banner {
-      margin: 4px 16px 14px;
+      margin: 0 16px 14px;
       background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
       border: 1px solid #fdba74;
       border-radius: 16px;
@@ -128,9 +139,8 @@
       display: flex;
       gap: 12px;
       align-items: flex-start;
-      box-shadow: 0 4px 12px rgba(249, 115, 22, 0.08);
       cursor: pointer;
-      position: relative;
+      box-shadow: 0 3px 10px rgba(249, 115, 22, 0.08);
     }
 
     .outage-icon-box {
@@ -145,19 +155,15 @@
       flex-shrink: 0;
     }
 
-    .outage-content {
-      flex: 1;
-    }
-
+    .outage-content { flex: 1; }
     .outage-badge {
       display: inline-block;
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
       color: #c2410c;
       background: #ffedd5;
-      padding: 2px 7px;
+      padding: 2px 6px;
       border-radius: 6px;
       margin-bottom: 4px;
     }
@@ -166,8 +172,7 @@
       font-size: 14px;
       font-weight: 700;
       color: #9a3412;
-      line-height: 1.25;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
 
     .outage-desc {
@@ -176,17 +181,22 @@
       line-height: 1.35;
     }
 
-    /* Напоминание о передаче показаний */
+    /* Карточки и разделы */
     .reminder-banner {
       background: #ffffff;
-      border: 1px solid #e0f2fe;
       border-radius: 16px;
       margin: 0 16px 16px;
       padding: 14px 16px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      justify-content: space-between;
       box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+
+    .reminder-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .meter-circle-icon {
@@ -202,18 +212,18 @@
       flex-shrink: 0;
     }
 
-    .reminder-text {
-      font-size: 13px;
-      color: #475569;
-      line-height: 1.35;
-    }
-
-    .reminder-text span {
+    .remind-bot-btn {
+      background: #e0f2fe;
+      border: 1px solid #bae6fd;
       color: #0284c7;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
       font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
     }
 
-    /* Заголовки разделов */
     .section-title-row {
       display: flex;
       justify-content: space-between;
@@ -227,11 +237,6 @@
       color: #0f172a;
     }
 
-    .section-arrow {
-      color: #94a3b8;
-    }
-
-    /* Карточка абонента на главной */
     .account-card {
       background: #ffffff;
       margin: 0 16px 20px;
@@ -240,12 +245,6 @@
       box-shadow: 0 4px 16px rgba(0,0,0,0.04);
       cursor: pointer;
       border: 1px solid #edf2f7;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .account-card:active {
-      transform: scale(0.985);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
     .account-card-header {
@@ -255,45 +254,10 @@
       margin-bottom: 4px;
     }
 
-    .account-name {
-      font-size: 17px;
-      font-weight: 700;
-      color: #0f172a;
-    }
-
-    .account-more-dots {
-      color: #38bdf8;
-      font-weight: 800;
-      font-size: 18px;
-      letter-spacing: 2px;
-    }
-
-    .account-sub {
-      font-size: 12px;
-      color: #94a3b8;
-      margin-bottom: 14px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .account-due-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .account-due-label {
-      font-size: 14px;
-      color: #475569;
-    }
-
-    .account-due-amount {
-      font-size: 18px;
-      font-weight: 700;
-      color: #0f172a;
-    }
+    .account-name { font-size: 17px; font-weight: 700; }
+    .account-sub { font-size: 12px; color: #94a3b8; margin-bottom: 14px; }
+    .account-due-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .account-due-amount { font-size: 18px; font-weight: 700; }
 
     .status-pill {
       display: inline-block;
@@ -302,23 +266,9 @@
       font-size: 11px;
       font-weight: 600;
     }
+    .status-pill.warning { background: #fef9c3; color: #ca8a04; }
 
-    .status-pill.warning {
-      background: #fef9c3;
-      color: #ca8a04;
-    }
-
-    .edit-hint {
-      margin-top: 10px;
-      font-size: 11px;
-      color: #0284c7;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-weight: 500;
-    }
-
-    /* Блок «Другое» */
+    /* Блок Другое */
     .services-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -337,20 +287,9 @@
       border: 1px solid #f1f5f9;
       cursor: pointer;
       text-align: left;
-      transition: background 0.15s;
     }
 
-    .service-btn:active {
-      background: #f8fafc;
-    }
-
-    .service-btn-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: #334155;
-      line-height: 1.3;
-    }
-
+    .service-btn-title { font-size: 12px; font-weight: 600; color: #334155; line-height: 1.3; }
     .service-icon-box {
       width: 36px;
       height: 36px;
@@ -370,8 +309,8 @@
       transform: translateX(-50%);
       width: 100%;
       max-width: 480px;
-      height: calc(65px + var(--safe-area-inset-bottom));
-      padding-bottom: var(--safe-area-inset-bottom);
+      height: calc(65px + var(--safe-area-bottom));
+      padding-bottom: var(--safe-area-bottom);
       background: #ffffff;
       border-top: 1px solid #e2e8f0;
       display: flex;
@@ -394,10 +333,7 @@
       width: 20%;
     }
 
-    .nav-item.active {
-      color: #0284c7;
-      font-weight: 600;
-    }
+    .nav-item.active { color: #0284c7; font-weight: 600; }
 
     .nav-center-bubble {
       width: 44px;
@@ -412,38 +348,20 @@
       border: 3px solid #ffffff;
       margin-top: -14px;
       cursor: pointer;
-      transition: transform 0.15s;
     }
 
-    .nav-center-bubble:active {
-      transform: scale(0.92);
-    }
-
-    /* Форма ввода данных абонента */
+    /* Экран формы */
     .form-group-card {
       background: #ffffff;
       margin: 0 16px 16px;
       border-radius: 20px;
       padding: 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
 
-    .field-wrap {
-      margin-bottom: 16px;
-    }
-
-    .field-wrap:last-child {
-      margin-bottom: 0;
-    }
-
-    .field-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #64748b;
-      margin-bottom: 6px;
-      display: block;
-    }
-
+    .field-wrap { margin-bottom: 16px; }
+    .field-wrap:last-child { margin-bottom: 0; }
+    .field-label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px; display: block; }
     .field-input {
       width: 100%;
       height: 46px;
@@ -456,27 +374,11 @@
       outline: none;
       font-family: inherit;
     }
-
-    .field-input:focus {
-      border-color: #0284c7;
-      background: #ffffff;
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
-    }
-
-    .field-row-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .field-hint {
-      font-size: 11px;
-      color: #94a3b8;
-      margin-top: 4px;
-    }
+    .field-input:focus { border-color: #0284c7; background: #fff; }
+    .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
     .action-btn-main {
-      margin: 12px 16px 30px;
+      margin: 12px 16px 20px;
       background: #0284c7;
       color: #ffffff;
       height: 50px;
@@ -489,11 +391,6 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
-    }
-
-    .action-btn-main:active {
-      background: #0369a1;
-      transform: scale(0.99);
     }
 
     /* Экран показаний */
@@ -512,16 +409,10 @@
       margin-bottom: 12px;
     }
 
-    .meter-title {
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.3px;
-    }
-
+    .meter-title { font-size: 13px; font-weight: 700; }
     .meter-title.cold { color: #0284c7; }
     .meter-title.hot { color: #e11d48; }
 
-    /* Кнопка инфо ℹ️ */
     .info-btn {
       width: 28px;
       height: 28px;
@@ -532,26 +423,16 @@
       justify-content: center;
       color: #64748b;
       cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-    }
-
-    .info-btn:active {
-      background: #e2e8f0;
-      transform: scale(0.92);
     }
 
     .meter-values-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
-    .meter-digits-box {
-      display: flex;
-      gap: 4px;
-    }
-
+    .meter-digits-box { display: flex; gap: 4px; }
     .digit-cell {
       width: 32px;
       height: 42px;
@@ -564,225 +445,110 @@
       font-weight: 700;
       color: #0f172a;
       border: 1px solid #e2e8f0;
-      transition: all 0.2s;
     }
 
-    .unit-tag {
-      font-size: 13px;
-      color: #64748b;
-      margin-left: 6px;
-      align-self: flex-end;
-      padding-bottom: 4px;
-    }
+    .consumption-box { text-align: right; }
+    .consumption-label { font-size: 11px; color: #94a3b8; }
+    .consumption-value { font-size: 18px; font-weight: 700; color: #94a3b8; }
 
-    .consumption-box {
-      text-align: right;
-    }
-
-    .consumption-label {
-      font-size: 11px;
-      color: #94a3b8;
-    }
-
-    .consumption-value {
-      font-size: 18px;
-      font-weight: 700;
-      color: #94a3b8;
-    }
-
-    .photo-meter-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      color: #0284c7;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 10px;
-      background: #f0f9ff;
-      border-radius: 12px;
-      cursor: pointer;
-    }
-
-    /* Экран бота */
-    .bot-screen-container {
-      background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
-      min-height: calc(100vh - 75px);
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-
-    .bot-header {
-      padding: 16px;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .bot-chat-area {
-      flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
-    }
-
-    .chat-date-pill {
-      align-self: center;
-      background: rgba(255,255,255,0.25);
-      color: #ffffff;
-      font-size: 11px;
-      padding: 3px 12px;
-      border-radius: 12px;
-    }
-
-    .msg-bubble {
-      max-width: 82%;
-      padding: 12px 14px;
-      border-radius: 16px;
-      font-size: 13px;
-      line-height: 1.4;
-      position: relative;
-    }
-
-    .msg-incoming {
-      background: #ffffff;
-      color: #0f172a;
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-    }
-
-    .msg-outgoing {
-      background: #38bdf8;
-      color: #ffffff;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-
-    .msg-time {
-      font-size: 10px;
-      opacity: 0.7;
-      text-align: right;
-      margin-top: 4px;
-    }
-
-    .bot-btn-action {
-      background: rgba(255,255,255,0.2);
-      border: 1px solid rgba(255,255,255,0.5);
-      color: #ffffff;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 8px;
-      cursor: pointer;
-      text-align: center;
-      width: fit-content;
-    }
-
-    .bot-input-bar {
-      padding: 12px 16px;
+    .step-buttons-row {
       display: flex;
       gap: 10px;
-      background: rgba(0,0,0,0.15);
     }
 
-    .bot-input {
+    .step-btn {
       flex: 1;
-      height: 42px;
-      border-radius: 20px;
-      border: none;
-      padding: 0 16px;
-      background: rgba(255,255,255,0.9);
-      outline: none;
-      font-size: 14px;
-    }
-
-    .bot-send-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #ffffff;
-      color: #0284c7;
-      border: none;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
+      gap: 4px;
     }
 
-    /* Экран оплаты с вводом показаний */
-    .bill-detail-card {
-      background: #ffffff;
-      margin: 0 16px 16px;
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    }
-
-    .bill-field {
-      margin-bottom: 12px;
-    }
-
-    .bill-field:last-child {
-      margin-bottom: 0;
-    }
-
-    .bill-field-lbl {
+    .anomaly-badge {
+      display: none;
+      margin-top: 10px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      border-radius: 10px;
+      padding: 8px 12px;
       font-size: 11px;
-      color: #94a3b8;
-      margin-bottom: 2px;
-    }
-
-    .bill-field-val {
-      font-size: 14px;
       font-weight: 600;
-      color: #0f172a;
     }
 
-    /* Блок ввода показаний в Оплате */
-    .pay-meter-inputs-card {
-      background: #ffffff;
-      margin: 0 16px 16px;
-      border-radius: 20px;
-      padding: 18px 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-      border: 1px solid #e0f2fe;
-    }
-
-    .pay-meter-inputs-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: #0f172a;
-      margin-bottom: 12px;
+    /* Экран оплаты */
+    .payment-method-selector {
       display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* Вкладки истории, льгот и заявок */
-    .history-tabs {
-      display: flex;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 0 16px;
-      gap: 20px;
+      gap: 10px;
       margin-bottom: 14px;
     }
 
+    .pay-method-pill {
+      flex: 1;
+      padding: 10px 8px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .pay-method-pill.active {
+      border-color: #0284c7;
+      background: #f0f9ff;
+      color: #0284c7;
+    }
+
+    .bill-field { margin-bottom: 12px; }
+    .bill-field-lbl { font-size: 11px; color: #94a3b8; margin-bottom: 2px; }
+    .bill-field-val { font-size: 14px; font-weight: 600; color: #0f172a; }
+
+    /* ========================================= */
+    /* ВЕРСТКА ПРОФИЛЯ И ВКЛАДОК (ИСПРАВЛЕННАЯ)   */
+    /* ========================================= */
+    .history-tabs-container {
+      width: 100%;
+      border-bottom: 1px solid #e2e8f0;
+      background: #f4f7fb;
+      padding: 0 16px;
+      margin-bottom: 16px;
+    }
+
+    .history-tabs {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+    }
+
     .tab-item {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       color: #94a3b8;
-      padding: 10px 0;
+      padding: 12px 6px;
       position: relative;
       cursor: pointer;
+      text-align: center;
+      white-space: nowrap;
+      transition: color 0.15s ease;
     }
 
     .tab-item.active {
       color: #0284c7;
+      font-weight: 700;
     }
 
     .tab-item.active::after {
@@ -791,16 +557,20 @@
       bottom: -1px;
       left: 0;
       right: 0;
-      height: 2px;
+      height: 3px;
       background: #0284c7;
+      border-radius: 3px 3px 0 0;
     }
 
+    /* Изоляция контента вкладок */
     .tab-content {
-      display: none;
+      display: none !important;
+      width: 100%;
     }
 
     .tab-content.active {
-      display: block;
+      display: block !important;
+      animation: fadeIn 0.2s ease-out;
     }
 
     /* Карточка льгот */
@@ -833,19 +603,8 @@
       flex-shrink: 0;
     }
 
-    .benefit-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #065f46;
-      line-height: 1.25;
-    }
-
-    .benefit-body {
-      font-size: 13px;
-      color: #047857;
-      line-height: 1.45;
-    }
-
+    .benefit-title { font-size: 16px; font-weight: 700; color: #065f46; line-height: 1.25; }
+    .benefit-body { font-size: 13px; color: #047857; line-height: 1.45; }
     .benefit-badge {
       display: inline-block;
       margin-top: 10px;
@@ -862,7 +621,7 @@
       background: #ffffff;
       margin: 0 16px 16px;
       border-radius: 20px;
-      padding: 16px;
+      padding: 18px;
     }
 
     .bars-container {
@@ -873,63 +632,110 @@
       padding-top: 10px;
     }
 
-    .bar-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .bar-pair {
-      display: flex;
-      align-items: flex-end;
-      gap: 3px;
-      height: 80px;
-    }
-
-    .bar-cold {
-      width: 7px;
-      background: #38bdf8;
-      border-radius: 4px;
-    }
-
-    .bar-hot {
-      width: 7px;
-      background: #fca5a5;
-      border-radius: 4px;
-    }
-
-    .bar-label {
-      font-size: 10px;
-      color: #94a3b8;
-    }
+    .bar-group { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .bar-pair { display: flex; align-items: flex-end; gap: 4px; height: 80px; }
+    .bar-cold { width: 8px; background: #38bdf8; border-radius: 4px; transition: height 0.3s; }
+    .bar-hot { width: 8px; background: #fca5a5; border-radius: 4px; transition: height 0.3s; }
+    .bar-label { font-size: 10px; color: #94a3b8; }
 
     .history-list {
       background: #ffffff;
       margin: 0 16px 16px;
       border-radius: 20px;
-      padding: 14px 18px;
+      padding: 16px 18px;
     }
 
     .history-item {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
+      padding: 10px 0;
       border-bottom: 1px dashed #f1f5f9;
       font-size: 13px;
     }
+    .history-item:last-child { border-bottom: none; }
 
-    .history-item:last-child {
-      border-bottom: none;
+    /* Кнопка записи на выезд мастера */
+    .master-order-btn {
+      width: calc(100% - 32px);
+      margin: 0 16px 16px;
+      height: 48px;
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
-    /* Модальные окна */
+    /* Чат бот */
+    .bot-screen-container {
+      background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
+      min-height: calc(100vh - 75px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bot-chat-area {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+
+    .msg-bubble {
+      max-width: 82%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .msg-incoming { background: #ffffff; color: #0f172a; align-self: flex-start; }
+    .msg-outgoing { background: #38bdf8; color: #ffffff; align-self: flex-end; }
+    .msg-time { font-size: 10px; opacity: 0.7; text-align: right; margin-top: 4px; }
+
+    .bot-input-bar {
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      background: rgba(0,0,0,0.15);
+    }
+
+    .bot-input {
+      flex: 1;
+      height: 42px;
+      border-radius: 20px;
+      border: none;
+      padding: 0 16px;
+      background: #ffffff;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .bot-send-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #ffffff;
+      color: #0284c7;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Модалки */
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.5);
       z-index: 200;
       display: none;
@@ -938,9 +744,7 @@
       padding: 20px;
     }
 
-    .modal-overlay.active {
-      display: flex;
-    }
+    .modal-overlay.active { display: flex; }
 
     .modal-card {
       background: #ffffff;
@@ -949,49 +753,29 @@
       max-width: 360px;
       width: 100%;
       text-align: center;
-      animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @keyframes modalPop {
-      from { transform: scale(0.9); opacity: 0; }
+      from { transform: scale(0.92); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
 
     .modal-icon {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 16px;
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 14px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    .modal-icon.warning {
-      background: #ffedd5;
-      color: #f97316;
-    }
+    .modal-icon.warning { background: #ffedd5; color: #f97316; }
+    .modal-icon.info { background: #e0f2fe; color: #0284c7; }
 
-    .modal-icon.info {
-      background: #e0f2fe;
-      color: #0284c7;
-    }
-
-    .modal-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #0f172a;
-      margin-bottom: 10px;
-    }
-
-    .modal-text {
-      font-size: 13px;
-      color: #475569;
-      line-height: 1.45;
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .modal-text { font-size: 13px; color: #475569; line-height: 1.45; margin-bottom: 18px; text-align: left; }
     .modal-btn {
       width: 100%;
       height: 46px;
@@ -1004,7 +788,6 @@
       cursor: pointer;
     }
 
-    /* Всплывающий тост */
     .toast-msg {
       position: fixed;
       top: 16px;
@@ -1017,22 +800,19 @@
       font-size: 13px;
       font-weight: 500;
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.25s ease;
       z-index: 300;
       white-space: nowrap;
     }
 
-    .toast-msg.show {
-      transform: translateX(-50%) translateY(0);
-    }
+    .toast-msg.show { transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
 
   <div class="app-viewport">
     
-    <!-- Тост-уведомление -->
-    <div id="toast" class="toast-msg">Данные успешно сохранены</div>
+    <div id="toast" class="toast-msg">Данные обновлены</div>
 
     <!-- ========================================== -->
     <!-- 1. ЭКРАН: ГЛАВНАЯ                          -->
@@ -1042,7 +822,17 @@
         <h1>Главная</h1>
       </div>
 
-      <!-- Оповещение об отключении воды 25 октября 2026 -->
+      <!-- Мультиаккаунт (Селектор объектов) -->
+      <div class="account-switcher-wrap">
+        <select class="account-select" id="accountSelector" onchange="switchAccount(this.value)">
+          <option value="home">🏠 Квартира (ул. Добрякова, д. 1, кв. 1)</option>
+          <option value="dacha">🏡 Дача (пос. Вороновское, уч. 42)</option>
+          <option value="parents">👵 Квартира родителей (ул. Ленина, д. 14, кв. 8)</option>
+        </select>
+        <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: #94a3b8;"></i>
+      </div>
+
+      <!-- Баннер отключения воды 25 октября 2026 -->
       <div class="outage-alert-banner" onclick="openOutageModal()">
         <div class="outage-icon-box">
           <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
@@ -1054,35 +844,39 @@
         </div>
       </div>
 
-      <!-- Напоминание о передаче показаний -->
+      <!-- Напоминание и передача -->
       <div class="reminder-banner">
-        <div class="meter-circle-icon">
-          <i data-lucide="gauge" style="width: 22px; height: 22px;"></i>
+        <div class="reminder-left">
+          <div class="meter-circle-icon">
+            <i data-lucide="gauge" style="width: 22px; height: 22px;"></i>
+          </div>
+          <div style="font-size: 13px; color: #475569; line-height: 1.35;">
+            Передать показания через: <br>
+            <span style="color: #0284c7; font-weight: 600;">3 дня 12 ч : 53 мин</span>
+          </div>
         </div>
-        <div class="reminder-text">
-          Вы можете передать показания через: <br>
-          <span id="countdownTimer">3 дня 12 ч : 53 мин</span>
-        </div>
+        <button class="remind-bot-btn" onclick="scheduleBotReminder()">
+          Напомнить 15-го
+        </button>
       </div>
 
-      <!-- Раздел Абонентский номер -->
       <div class="section-title-row">
         <div class="section-title">Абонентский номер</div>
-        <i data-lucide="chevron-right" class="section-arrow" style="width: 18px; height: 18px;"></i>
+        <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: #94a3b8;"></i>
       </div>
 
-      <!-- КАРТОЧКА СЧЕТА: Клик перекидывает на ввод ФИО, адреса, этажа, кадастра -->
+      <!-- Карточка счёта -->
       <div class="account-card" onclick="goToScreen('screen-form')">
         <div class="account-card-header">
-          <div class="account-name">Дом</div>
-          <div class="account-more-dots">•••</div>
+          <div class="account-name" id="homeAccountTitle">Дом</div>
+          <div style="color: #38bdf8; font-weight: 800; font-size: 18px; letter-spacing: 2px;">•••</div>
         </div>
         <div class="account-sub" id="homeCardAddress">
           Адрес: ул. Добрякова, д. 1, кв. 1 • Лицевой: 472 383 813
         </div>
 
         <div class="account-due-row">
-          <div class="account-due-label">Сумма к оплате:</div>
+          <div style="font-size: 14px; color: #475569;">Сумма к оплате:</div>
           <div class="account-due-amount" id="homeDueAmount">1 250 ₽</div>
         </div>
 
@@ -1090,19 +884,19 @@
           <span class="status-pill warning">Показания не переданы</span>
         </div>
 
-        <div class="edit-hint">
+        <div style="margin-top: 10px; font-size: 11px; color: #0284c7; display: flex; align-items: center; gap: 4px; font-weight: 500;">
           <i data-lucide="edit-3" style="width: 12px; height: 12px;"></i>
           Нажмите, чтобы изменить ФИО, адрес, этаж или кадастровый номер
         </div>
       </div>
 
-      <!-- Раздел: Другое -->
+      <!-- Раздел Другое -->
       <div class="section-title-row">
         <div class="section-title">Другое</div>
       </div>
 
       <div class="services-grid">
-        <div class="service-btn" onclick="showContractNotice()">
+        <div class="service-btn" onclick="openMasterModal()">
           <div class="service-btn-title">Поверка или замена прибора</div>
           <div class="service-icon-box">
             <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
@@ -1138,41 +932,37 @@
       </div>
 
       <div class="form-group-card">
-        <!-- Имя и Фамилия -->
         <div class="field-row-2 field-wrap">
           <div>
             <label class="field-label">Имя</label>
-            <input type="text" id="inputFirstName" class="field-input" value="Иван" placeholder="Иван">
+            <input type="text" id="inputFirstName" class="field-input" value="Иван">
           </div>
           <div>
             <label class="field-label">Фамилия</label>
-            <input type="text" id="inputLastName" class="field-input" value="Иванов" placeholder="Иванов">
+            <input type="text" id="inputLastName" class="field-input" value="Иванов">
           </div>
         </div>
 
-        <!-- Адрес -->
         <div class="field-wrap">
           <label class="field-label">Адрес (улица и дом)</label>
-          <input type="text" id="inputAddress" class="field-input" value="ул. Добрякова, д. 1" placeholder="ул. Добрякова, д. 1">
+          <input type="text" id="inputAddress" class="field-input" value="ул. Добрякова, д. 1">
         </div>
 
-        <!-- Квартира и Этаж -->
         <div class="field-row-2 field-wrap">
           <div>
             <label class="field-label">Квартира</label>
-            <input type="text" id="inputApartment" class="field-input" value="1" placeholder="Кв.">
+            <input type="text" id="inputApartment" class="field-input" value="1">
           </div>
           <div>
             <label class="field-label">Этаж</label>
-            <input type="number" id="inputFloor" class="field-input" value="3" placeholder="Этаж">
+            <input type="number" id="inputFloor" class="field-input" value="3">
           </div>
         </div>
 
-        <!-- Кадастровый номер -->
         <div class="field-wrap">
           <label class="field-label">Кадастровый номер</label>
-          <input type="text" id="inputCadastral" class="field-input" value="77:01:0001001:1024" placeholder="77:01:0001001:1024">
-          <div class="field-hint">Формат: 77:XX:XXXXXXX:XXXX (по данным ЕГРН)</div>
+          <input type="text" id="inputCadastral" class="field-input" value="77:01:0001001:1024">
+          <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Формат: 77:XX:XXXXXXX:XXXX (по данным ЕГРН)</div>
         </div>
       </div>
 
@@ -1195,7 +985,7 @@
 
       <div style="padding: 0 20px 12px;">
         <div style="font-size: 15px; font-weight: 700; color: #0f172a;">Абонентский номер</div>
-        <div style="font-size: 12px; color: #64748b;" id="meterScreenAccountLabel">Дом | 8738723738</div>
+        <div style="font-size: 12px; color: #64748b;" id="meterScreenAccountLabel">Дом | 472 383 813</div>
         <div style="font-size: 11px; color: #94a3b8;" id="meterScreenAddressLabel">ул. Добрякова, д. 1, кв. 1</div>
       </div>
 
@@ -1203,7 +993,6 @@
       <div class="meter-card">
         <div class="meter-header">
           <span class="meter-title cold">ХВС №98489</span>
-          <!-- Кнопка Инфо (i) -->
           <div class="info-btn" onclick="openMeterInfoModal('cold')">
             <i data-lucide="info" style="width: 16px; height: 16px;"></i>
           </div>
@@ -1212,14 +1001,7 @@
         <div class="meter-values-row">
           <div>
             <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;">Текущие показания</div>
-            <div class="meter-digits-box" id="coldDigitsContainer">
-              <div class="digit-cell">0</div>
-              <div class="digit-cell">0</div>
-              <div class="digit-cell">1</div>
-              <div class="digit-cell">3</div>
-              <div class="digit-cell">4</div>
-              <span class="unit-tag">м³</span>
-            </div>
+            <div class="meter-digits-box" id="coldDigitsContainer"></div>
           </div>
           <div class="consumption-box">
             <div class="consumption-label">Расход</div>
@@ -1227,9 +1009,13 @@
           </div>
         </div>
 
-        <div class="photo-meter-btn" onclick="simulateCameraScan('ХВС')">
-          <i data-lucide="scan" style="width: 16px; height: 16px;"></i>
-          Передать показания по фото
+        <div class="step-buttons-row">
+          <button class="step-btn" onclick="adjustMeterVal('cold', -1)">-1 м³</button>
+          <button class="step-btn" onclick="adjustMeterVal('cold', +1)">+1 м³</button>
+        </div>
+
+        <div class="anomaly-badge" id="coldAnomalyBadge">
+          ⚠️ Расход превышает средний в 3 раза! Проверьте данные.
         </div>
       </div>
 
@@ -1237,7 +1023,6 @@
       <div class="meter-card">
         <div class="meter-header">
           <span class="meter-title hot">ГВС №98489</span>
-          <!-- Кнопка Инфо (i) -->
           <div class="info-btn" onclick="openMeterInfoModal('hot')">
             <i data-lucide="info" style="width: 16px; height: 16px;"></i>
           </div>
@@ -1246,14 +1031,7 @@
         <div class="meter-values-row">
           <div>
             <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;">Текущие показания</div>
-            <div class="meter-digits-box" id="hotDigitsContainer">
-              <div class="digit-cell">0</div>
-              <div class="digit-cell">0</div>
-              <div class="digit-cell">0</div>
-              <div class="digit-cell">9</div>
-              <div class="digit-cell">8</div>
-              <span class="unit-tag">м³</span>
-            </div>
+            <div class="meter-digits-box" id="hotDigitsContainer"></div>
           </div>
           <div class="consumption-box">
             <div class="consumption-label">Расход</div>
@@ -1261,14 +1039,14 @@
           </div>
         </div>
 
-        <div class="photo-meter-btn" onclick="simulateCameraScan('ГВС')">
-          <i data-lucide="scan" style="width: 16px; height: 16px;"></i>
-          Передать показания по фото
+        <div class="step-buttons-row">
+          <button class="step-btn" onclick="adjustMeterVal('hot', -1)">-1 м³</button>
+          <button class="step-btn" onclick="adjustMeterVal('hot', +1)">+1 м³</button>
         </div>
-      </div>
 
-      <div style="text-align: center; font-size: 11px; color: #94a3b8; padding: 4px 20px 10px;">
-        С помощью камеры вы можете быстро передать показания.
+        <div class="anomaly-badge" id="hotAnomalyBadge">
+          ⚠️ Расход превышает средний в 3 раза! Проверьте данные.
+        </div>
       </div>
 
       <button class="action-btn-main" onclick="submitMeters()">
@@ -1278,7 +1056,7 @@
 
 
     <!-- ========================================== -->
-    <!-- 4. ЭКРАН: ОПЛАТА С ВВОДОМ И СИНХРОНИЗАЦИЕЙ   -->
+    <!-- 4. ЭКРАН: ОПЛАТА С ПЛАТЕЖНЫМИ СИСТЕМАМИ     -->
     <!-- ========================================== -->
     <div id="screen-pay" class="screen">
       <div class="app-header">
@@ -1288,72 +1066,79 @@
         <h1>Оплата</h1>
       </div>
 
-      <!-- Ввод количества холодной и горячей воды -->
-      <div class="pay-meter-inputs-card">
-        <div class="pay-meter-inputs-title">
+      <!-- Ввод показаний в оплате -->
+      <div class="form-group-card">
+        <div style="font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
           <i data-lucide="droplets" style="width: 18px; height: 18px; color: #0284c7;"></i>
-          Ввод показаний для оплаты
+          Показания к оплате
         </div>
         <div class="field-row-2">
           <div>
             <label class="field-label" style="color: #0284c7;">Холодная вода (ХВС), м³</label>
-            <input type="number" id="payInputCold" class="field-input" value="134" placeholder="134" oninput="syncFromPaymentInputs()">
+            <input type="number" id="payInputCold" class="field-input" value="134" oninput="syncFromPaymentInputs()">
           </div>
           <div>
             <label class="field-label" style="color: #e11d48;">Горячая вода (ГВС), м³</label>
-            <input type="number" id="payInputHot" class="field-input" value="98" placeholder="98" oninput="syncFromPaymentInputs()">
+            <input type="number" id="payInputHot" class="field-input" value="98" oninput="syncFromPaymentInputs()">
           </div>
-        </div>
-        <div class="field-hint" style="margin-top: 8px;">
-          Введённые значения автоматически дублируются во вкладку «Показания» и обновляют сумму.
         </div>
       </div>
 
-      <div class="bill-detail-card">
+      <!-- Выбор способа оплаты: СБП, СберПэй, Т-Пэй -->
+      <div class="form-group-card">
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">Способ оплаты</div>
+        <div class="payment-method-selector">
+          <div class="pay-method-pill active" id="pay-method-sbp" onclick="selectPayMethod('sbp')">
+            СБП
+          </div>
+          <div class="pay-method-pill" id="pay-method-sber" onclick="selectPayMethod('sber')">
+            СберПэй
+          </div>
+          <div class="pay-method-pill" id="pay-method-tpay" onclick="selectPayMethod('tpay')">
+            Т-Пэй
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 12px;">
+          <button style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="downloadReceiptPDF()">
+            <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
+            Квитанция (PDF)
+          </button>
+          <button style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="sendReceiptToBot()">
+            <i data-lucide="send" style="width: 14px; height: 14px;"></i>
+            Чек в MAX
+          </button>
+        </div>
+      </div>
+
+      <!-- Реквизиты договора -->
+      <div class="form-group-card">
         <div class="bill-field">
           <div class="bill-field-lbl">№ лицевого счета</div>
           <div class="bill-field-val">472 383 813</div>
         </div>
-
-        <div class="bill-field">
-          <div class="bill-field-lbl">Заключен</div>
-          <div class="bill-field-val">16.09.2022</div>
-        </div>
-
         <div class="bill-field">
           <div class="bill-field-lbl">Лицо по договору</div>
           <div class="bill-field-val" id="payPersonName">Иванов Иван Иванович</div>
         </div>
-
         <div class="bill-field">
           <div class="bill-field-lbl">Адрес объекта</div>
-          <div class="bill-field-val" id="payAddressDetail">12345, район Хороший, ул. Добрякова, д. 1, кв. 1 (Этаж: 3)</div>
+          <div class="bill-field-val" id="payAddressDetail">ул. Добрякова, д. 1, кв. 1 (Этаж: 3)</div>
         </div>
-
         <div class="bill-field">
           <div class="bill-field-lbl">Кадастровый номер</div>
           <div class="bill-field-val" id="payCadastralDetail">77:01:0001001:1024</div>
         </div>
-
-        <div class="bill-field">
-          <div class="bill-field-lbl">Тариф на питьевую воду</div>
-          <div class="bill-field-val">50.93 ₽/м³</div>
-        </div>
-
-        <div class="bill-field">
-          <div class="bill-field-lbl">Тариф на водоотведение</div>
-          <div class="bill-field-val">39.97 ₽/м³</div>
-        </div>
       </div>
 
       <button class="action-btn-main" id="paySubmitBtn" onclick="processPayment()">
-        К оплате: 1 250 ₽
+        Оплатить через СБП: 1 250 ₽
       </button>
     </div>
 
 
     <!-- ========================================== -->
-    <!-- 5. ЭКРАН: ЛЬГОТЫ, ЗАЯВКИ, ИСТОРИЯ          -->
+    <!-- 5. ЭКРАН: ПРОФИЛЬ (ИСПРАВЛЕННЫЙ)           -->
     <!-- ========================================== -->
     <div id="screen-history" class="screen">
       <div class="app-header">
@@ -1364,164 +1149,164 @@
         <button class="header-more-btn">•••</button>
       </div>
 
-      <div class="history-tabs">
-        <div class="tab-item" id="tab-btn-benefits" onclick="switchProfileTab('benefits')">Льготы</div>
-        <div class="tab-item" id="tab-btn-requests" onclick="switchProfileTab('requests')">Заявки</div>
-        <div class="tab-item active" id="tab-btn-history" onclick="switchProfileTab('history')">История показаний</div>
+      <!-- ГОРИЗОНТАЛЬНЫЙ ТАББАР ПРОФИЛЯ -->
+      <div class="history-tabs-container">
+        <div class="history-tabs">
+          <div class="tab-item" id="tab-btn-benefits" onclick="switchProfileTab('benefits')">Льготы</div>
+          <div class="tab-item" id="tab-btn-requests" onclick="switchProfileTab('requests')">Заявки</div>
+          <div class="tab-item active" id="tab-btn-history" onclick="switchProfileTab('history')">История показаний</div>
+        </div>
       </div>
 
-      <!-- Вкладка: ЛЬГОТЫ (Пенсионерские 50% ЖКУ) -->
+      <!-- 1. ВКЛАДКА: ЛЬГОТЫ (Пенсионерские 50% ЖКУ) -->
       <div id="tab-content-benefits" class="tab-content">
         <div class="pensioner-benefit-card">
           <div class="benefit-header-row">
             <div class="benefit-icon-box">🛡️</div>
             <div>
               <div class="benefit-title">У вас пенсионерские льготы 50% ЖКУ</div>
-              <div class="benefit-badge">Активна • Бессрочно</div>
+              <div class="benefit-badge">Льгота активна • Скидка 50%</div>
             </div>
           </div>
           <div class="benefit-body">
-            Вам предоставлена региональная мера социальной поддержки пенсионеров г. Калининграда. Скидка 50% автоматически применяется при начислении платежей за холодное/горячее водоснабжение и водоотведение.
+            Скидка 50% автоматически применяется при расчете начислений за холодное и горячее водоснабжение, а также водоотведение.
           </div>
         </div>
 
-        <div class="form-group-card" style="margin-top: 0;">
-          <div style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #0f172a;">Детали предоставления льготы</div>
+        <div class="form-group-card">
           <div class="bill-field">
-            <div class="bill-field-lbl">Категория льготополучателя</div>
-            <div class="bill-field-val">Пенсионер по возрасту</div>
+            <div class="bill-field-lbl">Категория</div>
+            <div class="bill-field-val">Пенсионер по старости</div>
           </div>
           <div class="bill-field">
-            <div class="bill-field-lbl">Размер компенсации</div>
-            <div class="bill-field-val">50% от начисленных услуг ЖКУ</div>
+            <div class="bill-field-lbl">Размер скидки</div>
+            <div class="bill-field-val">50% на услуги водоснабжения и ЖКУ</div>
+          </div>
+          <div class="bill-field">
+            <div class="bill-field-lbl">Статус</div>
+            <div class="bill-field-val" style="color: #059669;">Действует бессрочно</div>
           </div>
           <div class="bill-field">
             <div class="bill-field-lbl">Основание</div>
-            <div class="bill-field-val">Закон г. Калининграда № 70 от 03.11.2004</div>
+            <div class="bill-field-val">Закон г. Калининград № 70</div>
+          </div>
+          <div class="bill-field">
+            <div class="bill-field-lbl">Лицевой счёт</div>
+            <div class="bill-field-val" id="benefitAccountDisplay">472 383 813</div>
           </div>
         </div>
       </div>
 
-      <!-- Вкладка: ЗАЯВКИ -->
+      <!-- 2. ВКЛАДКА: ЗАЯВКИ И ВЫЗОВ МАСТЕРА -->
       <div id="tab-content-requests" class="tab-content">
         <div class="form-group-card">
-          <div style="font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 10px;">Активные заявки</div>
-          <div style="border-left: 3px solid #0284c7; padding-left: 10px; margin-bottom: 12px;">
-            <div style="font-size: 13px; font-weight: 600;">Заявка на прямой договор № 10928</div>
-            <div style="font-size: 11px; color: #64748b;">Статус: В обработке • от 10.10.2026</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="font-size: 14px; font-weight: 700;">Заявка № 84920</div>
+            <span style="background: #e0f2fe; color: #0284c7; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">В обработке</span>
           </div>
-          <div style="border-left: 3px solid #10b981; padding-left: 10px;">
-            <div style="font-size: 13px; font-weight: 600;">Поверка счётчика ХВС № 98489</div>
-            <div style="font-size: 11px; color: #64748b;">Статус: Выполнено • Действителен до 2028 г.</div>
-          </div>
+          <div style="font-size: 13px; color: #475569; margin-bottom: 4px;">Прямой договор водоснабжения</div>
+          <div style="font-size: 11px; color: #94a3b8;">Подана: 15.09.2023 • Срок ответа до 5 рабочих дней</div>
         </div>
+
+        <!-- Кнопка вызова мастера (исправлена вёрстка) -->
+        <button class="master-order-btn" onclick="openMasterModal()">
+          <i data-lucide="wrench" style="width: 18px; height: 18px;"></i>
+          Записаться на выезд мастера
+        </button>
       </div>
 
-      <!-- Вкладка: ИСТОРИЯ ПОКАЗАНИЙ И ГРАФИК -->
+      <!-- 3. ВКЛАДКА: ИСТОРИЯ ПОКАЗАНИЙ И ГРАФИК (СИНХРОНИЗИРОВАНА) -->
       <div id="tab-content-history" class="tab-content active">
         <div class="chart-box">
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; color: #475569;">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 12px;">
             <i data-lucide="chevron-left" style="width: 16px; height: 16px; cursor: pointer;"></i>
-            <span>2023 - 2026</span>
+            <span>2026 год (Динамика)</span>
             <i data-lucide="chevron-right" style="width: 16px; height: 16px; cursor: pointer;"></i>
           </div>
 
           <div class="bars-container">
             <div class="bar-group">
               <div class="bar-pair">
-                <div class="bar-cold" style="height: 40px;"></div>
-                <div class="bar-hot" style="height: 25px;"></div>
+                <div class="bar-cold" style="height: 38px;"></div>
+                <div class="bar-hot" style="height: 24px;"></div>
               </div>
-              <div class="bar-label">23.07</div>
+              <div class="bar-label">Июль</div>
             </div>
 
             <div class="bar-group">
               <div class="bar-pair">
-                <div class="bar-cold" style="height: 35px;"></div>
+                <div class="bar-cold" style="height: 34px;"></div>
                 <div class="bar-hot" style="height: 20px;"></div>
               </div>
-              <div class="bar-label">24.08</div>
-            </div>
-
-            <div class="bar-group">
-              <div class="bar-pair">
-                <div class="bar-cold" style="height: 50px;"></div>
-                <div class="bar-hot" style="height: 30px;"></div>
-              </div>
-              <div class="bar-label">25.09</div>
-            </div>
-
-            <div class="bar-group">
-              <div class="bar-pair">
-                <div class="bar-cold" style="height: 45px;"></div>
-                <div class="bar-hot" style="height: 28px;"></div>
-              </div>
-              <div class="bar-label">24.10</div>
-            </div>
-
-            <div class="bar-group">
-              <div class="bar-pair">
-                <div class="bar-cold" style="height: 55px;"></div>
-                <div class="bar-hot" style="height: 32px;"></div>
-              </div>
-              <div class="bar-label">22.11</div>
+              <div class="bar-label">Авг</div>
             </div>
 
             <div class="bar-group">
               <div class="bar-pair">
                 <div class="bar-cold" style="height: 48px;"></div>
-                <div class="bar-hot" style="height: 29px;"></div>
+                <div class="bar-hot" style="height: 30px;"></div>
               </div>
-              <div class="bar-label">24.12</div>
+              <div class="bar-label">Сент</div>
+            </div>
+
+            <!-- Синхронизированный текущий месяц -->
+            <div class="bar-group">
+              <div class="bar-pair">
+                <div class="bar-cold" id="chartBarColdLive" style="height: 52px; background: #0284c7;"></div>
+                <div class="bar-hot" id="chartBarHotLive" style="height: 45px; background: #e11d48;"></div>
+              </div>
+              <div class="bar-label" style="font-weight: 700; color: #0284c7;">Окт (Вы)</div>
             </div>
           </div>
         </div>
 
         <div class="history-list">
-          <div style="font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 8px;">24.11.2023</div>
-          <div class="history-item"><span>ХВС № 83749</span><b>00123 м³</b></div>
-          <div class="history-item"><span>ГВС № 843749</span><b>00095 м³</b></div>
+          <!-- Динамическая синхронизированная верхняя строка -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 12px; font-weight: 700; color: #0284c7;">Текущий период (Октябрь 2026)</span>
+            <span style="font-size: 10px; background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Онлайн</span>
+          </div>
+          <div class="history-item">
+            <span>ХВС № 98489</span>
+            <b id="historyLiveCold">00134 м³</b>
+          </div>
+          <div class="history-item">
+            <span>ГВС № 98489</span>
+            <b id="historyLiveHot">00098 м³</b>
+          </div>
 
-          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 12px 0 8px;">23.10.2023</div>
-          <div class="history-item"><span>ХВС № 83749</span><b>00098 м³</b></div>
-          <div class="history-item"><span>ГВС № 843749</span><b>00086 м³</b></div>
+          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 14px 0 8px;">24.09.2026</div>
+          <div class="history-item"><span>ХВС № 98489</span><b>00116 м³</b></div>
+          <div class="history-item"><span>ГВС № 98489</span><b>00083 м³</b></div>
 
-          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 12px 0 8px;">23.09.2023</div>
-          <div class="history-item"><span>ХВС № 83749</span><b>00078 м³</b></div>
-          <div class="history-item"><span>ГВС № 843749</span><b>00080 м³</b></div>
+          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 14px 0 8px;">24.08.2026</div>
+          <div class="history-item"><span>ХВС № 98489</span><b>00098 м³</b></div>
+          <div class="history-item"><span>ГВС № 98489</span><b>00070 м³</b></div>
         </div>
       </div>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- 6. ЭКРАН: БОТ МОСВОДОКАНАЛ                -->
-    <!-- ========================================== -->
     <div id="screen-bot" class="screen">
       <div class="bot-screen-container">
-        <div class="bot-header">
-          <button style="background: none; border: none; color: #fff; cursor: pointer;" onclick="goToScreen('screen-home')">
+        <div class="app-header" style="background: transparent; color: #fff;">
+          <button class="header-back-btn" style="color: #fff;" onclick="goToScreen('screen-home')">
             <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
           </button>
-          <div style="font-size: 16px; font-weight: 700;">Бот мосводоканал</div>
+          <h1 style="color: #fff;">Бот Калининградводоканал</h1>
         </div>
 
         <div class="bot-chat-area" id="botChatArea">
-          <div class="chat-date-pill">Сегодня</div>
-
           <div class="msg-bubble msg-incoming">
             Здравствуйте! Чем могу помочь?
             <div class="msg-time">23:43</div>
           </div>
-
           <div class="msg-bubble msg-outgoing">
             Как оплатить счета?
             <div class="msg-time">23:43</div>
           </div>
-
           <div class="msg-bubble msg-incoming">
-            Выберите абонентский счёт и оплатите его не выходя из приложения.
-            <div class="bot-btn-action" onclick="goToScreen('screen-pay')">
+            Выберите удобный способ оплаты (СБП, СберПэй или Т-Пэй) и совершите оплату в один клик.
+            <div style="background: rgba(2, 132, 199, 0.1); border: 1px solid #0284c7; color: #0284c7; padding: 8px 12px; border-radius: 10px; font-weight: 600; margin-top: 8px; width: fit-content; cursor: pointer;" onclick="goToScreen('screen-pay')">
               Перейти к оплате
             </div>
             <div class="msg-time">23:44</div>
@@ -1529,7 +1314,7 @@
         </div>
 
         <div class="bot-input-bar">
-          <input type="text" id="botMsgInput" class="bot-input" placeholder="Напишите сообщение...">
+          <input type="text" id="botMsgInput" class="bot-input" placeholder="Напишите вопрос боту...">
           <button class="bot-send-btn" onclick="sendBotMessage()">
             <i data-lucide="send" style="width: 18px; height: 18px;"></i>
           </button>
@@ -1542,23 +1327,23 @@
     <!-- МОДАЛЬНЫЕ ОКНА                             -->
     <!-- ========================================== -->
 
-    <!-- Модалка: Оповещение об отключении воды 25 октября 2026 -->
+    <!-- Модалка: Отключение воды 25 октября 2026 -->
     <div id="outageModal" class="modal-overlay">
       <div class="modal-card">
         <div class="modal-icon warning">
           <i data-lucide="droplet-off" style="width: 32px; height: 32px;"></i>
         </div>
-        <div class="modal-title">Внимание: отключение воды</div>
+        <div class="modal-title">Отключение воды</div>
         <div class="modal-text">
           <b>25 октября 2026 года с 09:00 до 20:00</b><br>
-          по адресу <span id="modalOutageAddress">ул. Добрякова, д. 1</span> будут проводиться плановые гидравлические испытания и замена запорной арматуры.<br><br>
-          Пожалуйста, заблаговременно сделайте необходимый запас питьевой воды.
+          по адресу <span id="modalOutageAddress">ул. Добрякова, д. 1</span> будут проводиться гидравлические испытания трубопроводов.<br><br>
+          Пожалуйста, сделайте необходимый запас питьевой воды.
         </div>
         <button class="modal-btn" onclick="closeOutageModal()">Понятно, спасибо</button>
       </div>
     </div>
 
-    <!-- Модалка: Дата последней отправки показаний (ℹ️) -->
+    <!-- Модалка: Инфо о последней отправке (ℹ️) -->
     <div id="meterInfoModal" class="modal-overlay">
       <div class="modal-card">
         <div class="modal-icon info">
@@ -1568,7 +1353,7 @@
         <div class="modal-text">
           <div style="margin-bottom: 8px;">
             <b>Дата отправки показаний:</b><br>
-            <span id="infoMeterDate" style="color: #0284c7; font-size: 14px; font-weight: 600;">23 сентября 2026 г., 14:32:10</span>
+            <span id="infoMeterDate" style="color: #0284c7; font-size: 14px; font-weight: 600;">24 сентября 2026 г., 14:32:10</span>
           </div>
           <div style="margin-bottom: 8px;">
             <b>Переданное значение:</b> <span id="infoMeterValue">00134 м³</span>
@@ -1577,25 +1362,32 @@
             <b>Расход за период:</b> <span id="infoMeterDiff">18 м³</span>
           </div>
           <div>
-            <b>Статус в системе:</b> <span style="color: #10b981; font-weight: 600;">Принято к расчету</span>
+            <b>Статус в биллинге:</b> <span style="color: #10b981; font-weight: 600;">Принято к расчету</span>
           </div>
         </div>
         <button class="modal-btn" onclick="closeMeterInfoModal()">Закрыть</button>
       </div>
     </div>
 
-    <!-- Модалка: Заявка на прямой договор -->
-    <div id="contractModal" class="modal-overlay">
+    <!-- Модалка: Запись к мастеру -->
+    <div id="masterModal" class="modal-overlay">
       <div class="modal-card">
         <div class="modal-icon info">
-          <i data-lucide="clock" style="width: 32px; height: 32px;"></i>
+          <i data-lucide="calendar" style="width: 32px; height: 32px;"></i>
         </div>
-        <div class="modal-title">Заявка на прямой договор</div>
+        <div class="modal-title">Вызов мастера</div>
         <div class="modal-text">
-          Не забудьте передать показания на дату начала прямых расчётов в разделе «Заявки на прямой договор» в период<br><br>
-          <b>с 1-го по 15-е число месяца</b>
+          <label class="field-label">Выберите дату визита</label>
+          <input type="date" id="masterDate" class="field-input" value="2026-10-20" style="margin-bottom: 12px;">
+          
+          <label class="field-label">Интервал времени</label>
+          <select id="masterSlot" class="field-input">
+            <option>09:00 - 13:00 (Утро)</option>
+            <option>13:00 - 17:00 (День)</option>
+            <option>17:00 - 20:00 (Вечер)</option>
+          </select>
         </div>
-        <button class="modal-btn" onclick="closeContractModal()">Понятно</button>
+        <button class="modal-btn" onclick="submitMasterBooking()">Записаться</button>
       </div>
     </div>
 
@@ -1614,9 +1406,8 @@
         <span>Показания</span>
       </button>
 
-      <!-- Центральный логотип МВК -->
       <div class="nav-center-bubble" onclick="goToScreen('screen-bot')">
-        <span style="font-size: 11px; font-weight: 800; letter-spacing: -0.5px;">КВК</span>
+        <span style="font-size: 11px; font-weight: 800;">МВК</span>
       </div>
 
       <button class="nav-item" id="nav-pay" onclick="goToScreen('screen-pay')">
@@ -1633,7 +1424,7 @@
   </div>
 
   <script>
-    // Инициализация Telegram WebApp
+    // Telegram Web App
     const tg = window.Telegram?.WebApp;
     if (tg) {
       tg.ready();
@@ -1641,39 +1432,57 @@
       try {
         tg.setHeaderColor('#f4f7fb');
         tg.setBackgroundColor('#f4f7fb');
+        if (tg.BackButton) {
+          tg.BackButton.onClick(() => goToScreen('screen-home'));
+        }
       } catch (e) {}
     }
 
-    // Состояние абонента и приборов
-    const appState = {
-      subscriber: {
-        firstName: 'Иван',
-        lastName: 'Иванов',
-        address: 'ул. Добрякова, д. 1',
-        apartment: '1',
-        floor: '3',
-        cadastralNumber: '77:01:0001001:1024',
-        accountNumber: '472 383 813'
-      },
-      meters: {
-        cold: {
-          number: '№98489',
-          currentVal: 134,
-          prevVal: 116,
-          lastSentDate: '23 сентября 2026 г., 14:32:10'
+    // Состояние приложения
+    const state = {
+      currentAccount: 'home',
+      accounts: {
+        home: {
+          title: 'Дом',
+          address: 'ул. Добрякова, д. 1',
+          apartment: '1',
+          floor: '3',
+          cadastral: '77:01:0001001:1024',
+          accountNumber: '472 383 813',
+          owner: 'Иванов Иван Иванович',
+          coldPrev: 116,
+          hotPrev: 83,
+          coldVal: 134,
+          hotVal: 98
         },
-        hot: {
-          number: '№98489',
-          currentVal: 98,
-          prevVal: 83,
-          lastSentDate: '23 сентября 2026 г., 14:32:10'
+        dacha: {
+          title: 'Дача',
+          address: 'пос. Вороновское, уч. 42',
+          apartment: '—',
+          floor: '2',
+          cadastral: '50:27:0020114:512',
+          accountNumber: '109 482 911',
+          owner: 'Иванов Иван Иванович',
+          coldPrev: 45,
+          hotPrev: 20,
+          coldVal: 52,
+          hotVal: 24
+        },
+        parents: {
+          title: 'Квартира родителей',
+          address: 'ул. Ленина, д. 14',
+          apartment: '8',
+          floor: '4',
+          cadastral: '77:04:0003011:9812',
+          accountNumber: '381 920 119',
+          owner: 'Иванова Светлана Петровна',
+          coldPrev: 210,
+          hotPrev: 160,
+          coldVal: 224,
+          hotVal: 172
         }
       },
-      tariffs: {
-        waterSupply: 50.93,
-        waterDrainage: 39.97,
-        pensionerDiscount: 0.5 // 50% скидка на ЖКУ
-      }
+      selectedPayMethod: 'sbp'
     };
 
     function triggerHaptic(type = 'light') {
@@ -1687,137 +1496,175 @@
       const toast = document.getElementById('toast');
       toast.innerText = text;
       toast.classList.add('show');
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2500);
+      setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    // Переключение экранов
+    // Навигация по экранам
     function goToScreen(screenId) {
       triggerHaptic('selection_change');
 
-      document.querySelectorAll('.screen').forEach(scr => scr.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       const target = document.getElementById(screenId);
       if (target) target.classList.add('active');
 
       document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
       if (screenId === 'screen-home' || screenId === 'screen-form') {
         document.getElementById('nav-home')?.classList.add('active');
-      } else if (screenId === 'screen-meters') {
-        document.getElementById('nav-meters')?.classList.add('active');
-      } else if (screenId === 'screen-pay') {
-        document.getElementById('nav-pay')?.classList.add('active');
-      } else if (screenId === 'screen-history') {
-        document.getElementById('nav-history')?.classList.add('active');
+        if (tg?.BackButton) tg.BackButton.hide();
+      } else {
+        if (tg?.BackButton) tg.BackButton.show();
+        if (screenId === 'screen-meters') document.getElementById('nav-meters')?.classList.add('active');
+        else if (screenId === 'screen-pay') document.getElementById('nav-pay')?.classList.add('active');
+        else if (screenId === 'screen-history') document.getElementById('nav-history')?.classList.add('active');
       }
 
       window.scrollTo(0, 0);
     }
 
-    // Вкладки в Профиле (Льготы / Заявки / История)
+    // Переключение вкладок в Профиле
     function switchProfileTab(tabName) {
       triggerHaptic('selection_change');
 
+      // Кнопки табов
       document.getElementById('tab-btn-benefits').classList.toggle('active', tabName === 'benefits');
       document.getElementById('tab-btn-requests').classList.toggle('active', tabName === 'requests');
       document.getElementById('tab-btn-history').classList.toggle('active', tabName === 'history');
 
+      // Контент табов (строгая изоляция)
       document.getElementById('tab-content-benefits').classList.toggle('active', tabName === 'benefits');
       document.getElementById('tab-content-requests').classList.toggle('active', tabName === 'requests');
       document.getElementById('tab-content-history').classList.toggle('active', tabName === 'history');
     }
 
-    // Рендер цифр на барабанчиках
-    function renderDigitCells(containerId, value) {
+    // Рендер барабанчиков счётчиков
+    function renderDigits(containerId, value) {
       const container = document.getElementById(containerId);
       if (!container) return;
-
-      const strVal = String(value).padStart(5, '0');
+      const str = String(value).padStart(5, '0');
       let html = '';
-      for (let char of strVal) {
-        html += `<div class="digit-cell">${char}</div>`;
+      for (let c of str) {
+        html += `<div class="digit-cell">${c}</div>`;
       }
-      html += `<span class="unit-tag">м³</span>`;
+      html += `<span style="font-size: 13px; color: #64748b; margin-left: 6px; align-self: flex-end; padding-bottom: 4px;">м³</span>`;
       container.innerHTML = html;
     }
 
-    // Синхронизация ввода из Платежей в Показания
-    function syncFromPaymentInputs() {
-      const coldVal = parseInt(document.getElementById('payInputCold').value, 10) || 0;
-      const hotVal = parseInt(document.getElementById('payInputHot').value, 10) || 0;
+    // Синхронизация данных
+    function updateAllViews() {
+      const acc = state.accounts[state.currentAccount];
 
-      appState.meters.cold.currentVal = coldVal;
-      appState.meters.hot.currentVal = hotVal;
+      // Барабанчики
+      renderDigits('coldDigitsContainer', acc.coldVal);
+      renderDigits('hotDigitsContainer', acc.hotVal);
 
-      // Обновляем ячейки счетчиков
-      renderDigitCells('coldDigitsContainer', coldVal);
-      renderDigitCells('hotDigitsContainer', hotVal);
-
-      // Расчет расхода
-      const coldDiff = Math.max(0, coldVal - appState.meters.cold.prevVal);
-      const hotDiff = Math.max(0, hotVal - appState.meters.hot.prevVal);
+      // Расход
+      const coldDiff = Math.max(0, acc.coldVal - acc.coldPrev);
+      const hotDiff = Math.max(0, acc.hotVal - acc.hotPrev);
 
       document.getElementById('coldConsumptionDisplay').innerText = String(coldDiff).padStart(3, '0');
       document.getElementById('hotConsumptionDisplay').innerText = String(hotDiff).padStart(3, '0');
 
-      // Пересчет суммы с учетом пенсионной льготы 50%
-      const rawCost = (coldDiff * appState.tariffs.waterSupply) + (hotDiff * 190.50) + ((coldDiff + hotDiff) * appState.tariffs.waterDrainage);
-      const discountedCost = Math.round(rawCost * (1 - appState.tariffs.pensionerDiscount));
-      const totalCost = Math.max(1250, discountedCost); // Базовый минимум по начислениям
+      // Предупреждение об аномальном расходе
+      document.getElementById('coldAnomalyBadge').style.display = coldDiff > 25 ? 'block' : 'none';
+      document.getElementById('hotAnomalyBadge').style.display = hotDiff > 25 ? 'block' : 'none';
 
-      document.getElementById('paySubmitBtn').innerText = `К оплате: ${totalCost.toLocaleString('ru-RU')} ₽`;
-      document.getElementById('homeDueAmount').innerText = `${totalCost.toLocaleString('ru-RU')} ₽`;
+      // Поля в оплате
+      document.getElementById('payInputCold').value = acc.coldVal;
+      document.getElementById('payInputHot').value = acc.hotVal;
+
+      // Сумма со скидкой 50%
+      const baseSum = Math.round(((coldDiff * 50.93) + (hotDiff * 190.50) + ((coldDiff + hotDiff) * 39.97)) * 0.5);
+      const totalSum = Math.max(1250, baseSum);
+
+      document.getElementById('homeDueAmount').innerText = `${totalSum.toLocaleString('ru-RU')} ₽`;
+      updatePayButtonText(totalSum);
+
+      // СИНХРОНИЗАЦИЯ С ИСТОРИЕЙ В ПРОФИЛЕ
+      document.getElementById('historyLiveCold').innerText = `${String(acc.coldVal).padStart(5, '0')} м³`;
+      document.getElementById('historyLiveHot').innerText = `${String(acc.hotVal).padStart(5, '0')} м³`;
+
+      // Динамический график
+      const coldBarHeight = Math.min(80, Math.max(15, coldDiff * 3));
+      const hotBarHeight = Math.min(80, Math.max(15, hotDiff * 3));
+      document.getElementById('chartBarColdLive').style.height = `${coldBarHeight}px`;
+      document.getElementById('chartBarHotLive').style.height = `${hotBarHeight}px`;
+    }
+
+    function updatePayButtonText(sum) {
+      const btn = document.getElementById('paySubmitBtn');
+      const amount = sum || 1250;
+      let label = 'через СБП';
+      if (state.selectedPayMethod === 'sber') label = 'через СберПэй';
+      if (state.selectedPayMethod === 'tpay') label = 'через Т-Пэй';
+      btn.innerText = `Оплатить ${label}: ${amount.toLocaleString('ru-RU')} ₽`;
+    }
+
+    // Выбор способа оплаты
+    function selectPayMethod(method) {
+      triggerHaptic('light');
+      state.selectedPayMethod = method;
+      document.getElementById('pay-method-sbp').classList.toggle('active', method === 'sbp');
+      document.getElementById('pay-method-sber').classList.toggle('active', method === 'sber');
+      document.getElementById('pay-method-tpay').classList.toggle('active', method === 'tpay');
+      updatePayButtonText();
+    }
+
+    // Шаговые кнопки (+ / -)
+    function adjustMeterVal(type, delta) {
+      triggerHaptic('light');
+      const acc = state.accounts[state.currentAccount];
+      if (type === 'cold') acc.coldVal = Math.max(acc.coldPrev, acc.coldVal + delta);
+      if (type === 'hot') acc.hotVal = Math.max(acc.hotPrev, acc.hotVal + delta);
+      updateAllViews();
+    }
+
+    // Синхронизация при вводе в платежах
+    function syncFromPaymentInputs() {
+      const acc = state.accounts[state.currentAccount];
+      acc.coldVal = parseInt(document.getElementById('payInputCold').value, 10) || acc.coldPrev;
+      acc.hotVal = parseInt(document.getElementById('payInputHot').value, 10) || acc.hotPrev;
+      updateAllViews();
+    }
+
+    // Переключение мульти-аккаунта
+    function switchAccount(accKey) {
+      triggerHaptic('medium');
+      state.currentAccount = accKey;
+      const acc = state.accounts[accKey];
+
+      document.getElementById('homeAccountTitle').innerText = acc.title;
+      document.getElementById('homeCardAddress').innerText = `Адрес: ${acc.address}, кв. ${acc.apartment} • Лицевой: ${acc.accountNumber}`;
+      document.getElementById('outageAddressDisplay').innerText = acc.address;
+      document.getElementById('modalOutageAddress').innerText = acc.address;
+      document.getElementById('meterScreenAccountLabel').innerText = `${acc.title} | ${acc.accountNumber}`;
+      document.getElementById('meterScreenAddressLabel').innerText = `${acc.address}, кв. ${acc.apartment}`;
+      document.getElementById('payPersonName').innerText = acc.owner;
+      document.getElementById('payAddressDetail').innerText = `${acc.address}, кв. ${acc.apartment} (Этаж: ${acc.floor})`;
+      document.getElementById('payCadastralDetail').innerText = acc.cadastral;
+      document.getElementById('benefitAccountDisplay').innerText = acc.accountNumber;
+
+      // Обновляем форму
+      document.getElementById('inputAddress').value = acc.address;
+      document.getElementById('inputApartment').value = acc.apartment;
+      document.getElementById('inputFloor').value = acc.floor;
+      document.getElementById('inputCadastral').value = acc.cadastral;
+
+      updateAllViews();
+      showToast(`Выбран объект: ${acc.title}`);
     }
 
     // Сохранение данных абонента
     function saveSubscriberData() {
       triggerHaptic('success');
+      const acc = state.accounts[state.currentAccount];
+      acc.address = document.getElementById('inputAddress').value.trim();
+      acc.apartment = document.getElementById('inputApartment').value.trim();
+      acc.floor = document.getElementById('inputFloor').value.trim();
+      acc.cadastral = document.getElementById('inputCadastral').value.trim();
 
-      appState.subscriber.firstName = document.getElementById('inputFirstName').value.trim() || 'Иван';
-      appState.subscriber.lastName = document.getElementById('inputLastName').value.trim() || 'Иванов';
-      appState.subscriber.address = document.getElementById('inputAddress').value.trim() || 'ул. Добрякова, д. 1';
-      appState.subscriber.apartment = document.getElementById('inputApartment').value.trim() || '1';
-      appState.subscriber.floor = document.getElementById('inputFloor').value.trim() || '1';
-      appState.subscriber.cadastralNumber = document.getElementById('inputCadastral').value.trim() || '77:01:0001001:1024';
-
-      const fullAddr = `${appState.subscriber.address}, кв. ${appState.subscriber.apartment}`;
-
-      document.getElementById('homeCardAddress').innerText = 
-        `Адрес: ${fullAddr} • Лицевой: ${appState.subscriber.accountNumber}`;
-
-      document.getElementById('outageAddressDisplay').innerText = appState.subscriber.address;
-      document.getElementById('modalOutageAddress').innerText = fullAddr;
-      document.getElementById('meterScreenAddressLabel').innerText = fullAddr;
-
-      document.getElementById('payPersonName').innerText = 
-        `${appState.subscriber.lastName} ${appState.subscriber.firstName} Иванович`;
-
-      document.getElementById('payAddressDetail').innerText = 
-        `12345, ${appState.subscriber.address}, кв. ${appState.subscriber.apartment} (Этаж: ${appState.subscriber.floor})`;
-
-      document.getElementById('payCadastralDetail').innerText = appState.subscriber.cadastralNumber;
-
+      switchAccount(state.currentAccount);
       showToast('Данные успешно сохранены!');
       goToScreen('screen-home');
-    }
-
-    // Открытие окна инфо (ℹ️) для счётчика
-    function openMeterInfoModal(meterType) {
-      triggerHaptic('medium');
-      const info = appState.meters[meterType];
-      const isCold = meterType === 'cold';
-
-      document.getElementById('infoMeterTitle').innerText = `${isCold ? 'ХВС' : 'ГВС'} ${info.number}`;
-      document.getElementById('infoMeterDate').innerText = info.lastSentDate;
-      document.getElementById('infoMeterValue').innerText = `${String(info.currentVal).padStart(5, '0')} м³`;
-      document.getElementById('infoMeterDiff').innerText = `${Math.max(0, info.currentVal - info.prevVal)} м³`;
-
-      document.getElementById('meterInfoModal').classList.add('active');
-    }
-
-    function closeMeterInfoModal() {
-      triggerHaptic('light');
-      document.getElementById('meterInfoModal').classList.remove('active');
     }
 
     // Модальные окна
@@ -1825,96 +1672,93 @@
       triggerHaptic('medium');
       document.getElementById('outageModal').classList.add('active');
     }
-
     function closeOutageModal() {
       triggerHaptic('light');
       document.getElementById('outageModal').classList.remove('active');
     }
 
-    function showContractNotice() {
+    function openMeterInfoModal(type) {
       triggerHaptic('medium');
-      document.getElementById('contractModal').classList.add('active');
+      const acc = state.accounts[state.currentAccount];
+      const isCold = type === 'cold';
+      document.getElementById('infoMeterTitle').innerText = `${isCold ? 'ХВС' : 'ГВС'} №98489`;
+      document.getElementById('infoMeterValue').innerText = `${String(isCold ? acc.coldVal : acc.hotVal).padStart(5, '0')} м³`;
+      document.getElementById('infoMeterDiff').innerText = `${Math.max(0, (isCold ? acc.coldVal - acc.coldPrev : acc.hotVal - acc.hotPrev))} м³`;
+      document.getElementById('meterInfoModal').classList.add('active');
     }
-
-    function closeContractModal() {
+    function closeMeterInfoModal() {
       triggerHaptic('light');
-      document.getElementById('contractModal').classList.remove('active');
+      document.getElementById('meterInfoModal').classList.remove('active');
     }
 
-    // Передача показаний
+    function openMasterModal() {
+      triggerHaptic('medium');
+      document.getElementById('masterModal').classList.add('active');
+    }
+    function submitMasterBooking() {
+      triggerHaptic('success');
+      document.getElementById('masterModal').classList.remove('active');
+      showToast('Заявка мастеру отправлена!');
+    }
+
+    function scheduleBotReminder() {
+      triggerHaptic('success');
+      showToast('Напоминание 15-го числа установлено в боте!');
+    }
+
+    function downloadReceiptPDF() {
+      triggerHaptic('light');
+      showToast('Квитанция ЕПД (PDF) сформирована!');
+    }
+
+    function sendReceiptToBot() {
+      triggerHaptic('success');
+      showToast('Электронный чек отправлен в чат MAX!');
+    }
+
     function submitMeters() {
       triggerHaptic('success');
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) + 
-        ', ' + now.toLocaleTimeString('ru-RU');
-
-      appState.meters.cold.lastSentDate = dateStr;
-      appState.meters.hot.lastSentDate = dateStr;
-
-      showToast('Показания успешно переданы в Мосводоканал!');
-      setTimeout(() => {
-        goToScreen('screen-home');
-      }, 1200);
-    }
-
-    function simulateCameraScan(type) {
-      triggerHaptic('medium');
-      showToast(`Сканирование камеры для счетчика ${type}...`);
-      setTimeout(() => {
-        showToast(`Показания ${type} успешно распознаны!`);
-      }, 1200);
+      showToast('Показания успешно переданы!');
+      setTimeout(() => goToScreen('screen-home'), 900);
     }
 
     function processPayment() {
       triggerHaptic('success');
-      if (tg && tg.openInvoice) {
-        showToast('Переход к оплате счёта...');
-      } else {
-        showToast('Счёт успешно оплачен онлайн!');
-      }
+      let methodText = 'СБП';
+      if (state.selectedPayMethod === 'sber') methodText = 'СберПэй';
+      if (state.selectedPayMethod === 'tpay') methodText = 'Т-Пэй';
+      showToast(`Переход в банк (${methodText})...`);
     }
 
-    // Чат-бот
     function sendBotMessage() {
       const input = document.getElementById('botMsgInput');
       const text = input.value.trim();
       if (!text) return;
-
       triggerHaptic('light');
-      const chatArea = document.getElementById('botChatArea');
 
-      const outMsg = document.createElement('div');
-      outMsg.className = 'msg-bubble msg-outgoing';
-      outMsg.innerHTML = `${text}<div class="msg-time">Только что</div>`;
-      chatArea.appendChild(outMsg);
+      const chat = document.getElementById('botChatArea');
+      const userMsg = document.createElement('div');
+      userMsg.className = 'msg-bubble msg-outgoing';
+      userMsg.innerHTML = `${text}<div class="msg-time">Только что</div>`;
+      chat.appendChild(userMsg);
       input.value = '';
-
-      chatArea.scrollTop = chatArea.scrollHeight;
+      chat.scrollTop = chat.scrollHeight;
 
       setTimeout(() => {
         triggerHaptic('medium');
-        const botReply = document.createElement('div');
-        botReply.className = 'msg-bubble msg-incoming';
-        botReply.innerHTML = `Ваш запрос принят в обработку. По вопросу "${text}" вы также можете обратиться на горячую линию Мосводоканала: 8 (499) 763-34-34.<div class="msg-time">Только что</div>`;
-        chatArea.appendChild(botReply);
-        chatArea.scrollTop = chatArea.scrollHeight;
-      }, 700);
+        const botMsg = document.createElement('div');
+        botMsg.className = 'msg-bubble msg-incoming';
+        botMsg.innerHTML = `Запрос по теме "${text}" обработан. Горячая линия Калининградводоканала: 8 (999) 123-45-67.<div class="msg-time">Только что</div>`;
+        chat.appendChild(botMsg);
+        chat.scrollTop = chat.scrollHeight;
+      }, 600);
     }
-
-    document.getElementById('botMsgInput')?.addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') sendBotMessage();
-    });
 
     // Инициализация при старте
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      renderDigitCells('coldDigitsContainer', appState.meters.cold.currentVal);
-      renderDigitCells('hotDigitsContainer', appState.meters.hot.currentVal);
-
-      // Всплывающее предупреждение об отключении воды 25 октября 2026 года
-      setTimeout(() => {
-        openOutageModal();
-      }, 400);
+      updateAllViews();
+      setTimeout(() => openOutageModal(), 400);
     });
   </script>
 </body>
