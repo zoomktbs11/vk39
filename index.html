@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>КВК — MAX Mini App</title>
+  <title>Мосводоканал — Telegram Mini App</title>
   
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -21,14 +21,13 @@
       --bg-app: #f4f7fb;
       --card-bg: #ffffff;
       --primary-blue: #0284c7;
-      --mvk-blue: #155eef;
       --text-main: #0f172a;
       --text-muted: #64748b;
       --border-color: #e2e8f0;
       --safe-area-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    * {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -36,14 +35,18 @@
       user-select: none;
     }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-      background: var(--bg-app);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
+    html, body {
+      width: 100%;
       min-height: 100vh;
       overflow-x: hidden;
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
     }
 
     .app-viewport {
@@ -56,6 +59,7 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 0 35px rgba(0,0,0,0.06);
+      overflow-x: hidden;
     }
 
     /* Экраны приложения */
@@ -102,15 +106,15 @@
       padding: 6px;
     }
 
-    .header-back-btn { left: 16px; }
-    .header-more-btn { right: 16px; color: var(--text-muted); }
+    .header-back-btn { left: 14px; }
+    .header-more-btn { right: 14px; color: var(--text-muted); }
 
     /* Переключатель мульти-аккаунта (без дублера стрелочек) */
     .account-switcher-wrap {
       margin: 0 16px 12px;
       background: #ffffff;
       border-radius: 14px;
-      padding: 7px 14px;
+      padding: 8px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -132,7 +136,7 @@
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
-      padding-right: 24px;
+      padding-right: 28px;
     }
 
     .account-select::-ms-expand {
@@ -172,7 +176,7 @@
       flex-shrink: 0;
     }
 
-    .outage-content { flex: 1; }
+    .outage-content { flex: 1; min-width: 0; }
     .outage-badge {
       display: inline-block;
       font-size: 10px;
@@ -186,29 +190,31 @@
     }
 
     .outage-title { font-size: 14px; font-weight: 700; color: #9a3412; margin-bottom: 2px; }
-    .outage-desc { font-size: 12px; color: #c2410c; line-height: 1.35; }
+    .outage-desc { font-size: 12px; color: #c2410c; line-height: 1.35; word-break: break-word; }
 
     /* Баннер срока показаний */
     .reminder-banner {
       background: #ffffff;
       border-radius: 16px;
       margin: 0 16px 16px;
-      padding: 14px 16px;
+      padding: 12px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     }
 
     .reminder-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      min-width: 0;
     }
 
     .meter-circle-icon {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: #f0f9ff;
       border: 1px solid #bae6fd;
@@ -224,11 +230,12 @@
       border: 1px solid #bae6fd;
       color: #0284c7;
       border-radius: 10px;
-      padding: 6px 10px;
+      padding: 7px 10px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* Заголовки разделов (без стрелочки на Абонентском номере) */
@@ -259,7 +266,7 @@
     }
 
     .account-name { font-size: 17px; font-weight: 700; }
-    .account-sub { font-size: 12px; color: #94a3b8; margin-bottom: 14px; }
+    .account-sub { font-size: 12px; color: #94a3b8; margin-bottom: 14px; word-break: break-word; }
     .account-due-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .account-due-amount { font-size: 18px; font-weight: 700; }
 
@@ -272,31 +279,38 @@
     }
     .status-pill.warning { background: #fef9c3; color: #ca8a04; }
 
-    /* Блок «Другое» */
+    /* Блок «Другое» (адаптивная сетка) */
     .services-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
       padding: 0 16px 20px;
     }
 
     .service-btn {
       background: #ffffff;
       border-radius: 18px;
-      padding: 14px 10px;
+      padding: 12px 8px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 120px;
+      min-height: 116px;
       border: 1px solid #f1f5f9;
       cursor: pointer;
       text-align: left;
     }
 
-    .service-btn-title { font-size: 12px; font-weight: 600; color: #334155; line-height: 1.3; }
+    .service-btn-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #334155;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
     .service-icon-box {
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       border-radius: 10px;
       background: #f0f9ff;
       color: #38bdf8;
@@ -339,7 +353,7 @@
 
     .nav-item.active { color: #0284c7; font-weight: 600; }
 
-    /* Центральная круглая кнопка с логотипом Мосводоканала */
+    /* Центральная круглая кнопка с гербом Мосводоканала */
     .nav-center-bubble {
       width: 48px;
       height: 48px;
@@ -355,6 +369,7 @@
       overflow: hidden;
       transition: transform 0.15s ease;
       padding: 6px;
+      flex-shrink: 0;
     }
 
     .nav-center-bubble:active {
@@ -372,27 +387,27 @@
       background: #ffffff;
       margin: 0 16px 16px;
       border-radius: 20px;
-      padding: 20px;
+      padding: 16px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
 
-    .field-wrap { margin-bottom: 16px; }
+    .field-wrap { margin-bottom: 14px; }
     .field-wrap:last-child { margin-bottom: 0; }
     .field-label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px; display: block; }
     .field-input {
       width: 100%;
-      height: 46px;
+      height: 44px;
       background: #f8fafc;
       border: 1px solid #cbd5e1;
       border-radius: 12px;
-      padding: 0 14px;
-      font-size: 15px;
+      padding: 0 12px;
+      font-size: 14px;
       color: #0f172a;
       outline: none;
       font-family: inherit;
     }
     .field-input:focus { border-color: #0284c7; background: #fff; }
-    .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     .action-btn-main {
       margin: 12px 16px 20px;
@@ -415,7 +430,7 @@
       background: #ffffff;
       margin: 0 16px 14px;
       border-radius: 20px;
-      padding: 18px 20px;
+      padding: 16px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
 
@@ -441,76 +456,120 @@
       color: #64748b;
       cursor: pointer;
       transition: background 0.15s;
+      flex-shrink: 0;
     }
     .info-btn:active { background: #e2e8f0; }
 
     .meter-values-row {
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       justify-content: space-between;
+      gap: 8px;
       margin-bottom: 12px;
     }
 
-    .meter-digits-box { display: flex; gap: 4px; }
+    /* Адаптивные барабанчики цифр */
+    .meter-digits-box {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-wrap: nowrap;
+    }
+
     .digit-cell {
-      width: 32px;
-      height: 42px;
+      width: clamp(24px, 6.8vw, 32px);
+      height: clamp(34px, 9.2vw, 42px);
       background: #f1f5f9;
-      border-radius: 8px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 19px;
+      font-size: clamp(15px, 4.4vw, 19px);
       font-weight: 700;
       color: #0f172a;
       border: 1px solid #e2e8f0;
+      flex-shrink: 0;
     }
 
-    .consumption-box { text-align: right; }
-    .consumption-label { font-size: 11px; color: #94a3b8; }
-    .consumption-value { font-size: 18px; font-weight: 700; color: #94a3b8; }
+    .unit-tag {
+      font-size: 12px;
+      color: #64748b;
+      margin-left: 4px;
+      font-weight: 600;
+    }
 
-    /* Поле прямого ввода показаний цифрами */
+    .consumption-box { text-align: right; flex-shrink: 0; }
+    .consumption-label { font-size: 11px; color: #94a3b8; }
+    .consumption-value { font-size: 17px; font-weight: 700; color: #94a3b8; }
+
+    /* Оптимизированный адаптивный блок прямого ввода показаний */
     .manual-meter-input-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: space-between;
+      gap: 8px;
       margin-bottom: 10px;
       background: #f8fafc;
       border: 1px dashed #cbd5e1;
       border-radius: 12px;
-      padding: 8px 12px;
+      padding: 8px 10px;
+      width: 100%;
     }
 
     .manual-meter-input-row label {
       font-size: 12px;
       font-weight: 600;
       color: #475569;
-      white-space: nowrap;
+      flex: 1 1 auto;
+      min-width: 0;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .manual-meter-input-controls {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex: 0 0 auto;
+      max-width: 130px;
     }
 
     .manual-meter-input {
-      flex: 1;
-      height: 38px;
+      width: 85px;
+      height: 36px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
-      padding: 0 10px;
+      padding: 0 8px;
       font-size: 15px;
       font-weight: 700;
       color: #0f172a;
       outline: none;
       text-align: right;
+      font-family: inherit;
+      -webkit-appearance: none;
+      -moz-appearance: textfield;
+      appearance: none;
     }
+
+    .manual-meter-input::-webkit-outer-spin-button,
+    .manual-meter-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
     .manual-meter-input:focus { border-color: #0284c7; }
 
+    /* Адаптивные шаговые кнопки */
     .step-buttons-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
+      width: 100%;
     }
 
     .step-btn {
-      flex: 1;
+      flex: 1 1 0;
+      min-width: 0;
       height: 38px;
       border-radius: 10px;
       border: 1px solid #e2e8f0;
@@ -531,21 +590,24 @@
       border: 1px solid #fecaca;
       color: #b91c1c;
       border-radius: 10px;
-      padding: 8px 12px;
+      padding: 8px 10px;
       font-size: 11px;
       font-weight: 600;
+      line-height: 1.3;
     }
 
-    /* Экран оплаты */
+    /* Экран оплаты (адаптивный селектор методов) */
     .payment-method-selector {
       display: flex;
-      gap: 10px;
-      margin-bottom: 14px;
+      gap: 8px;
+      margin-bottom: 12px;
+      width: 100%;
     }
 
     .pay-method-pill {
-      flex: 1;
-      padding: 10px 8px;
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 10px 4px;
       border-radius: 12px;
       background: #f8fafc;
       border: 1.5px solid #e2e8f0;
@@ -554,6 +616,9 @@
       color: #334155;
       text-align: center;
       cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .pay-method-pill.active {
@@ -564,15 +629,15 @@
 
     .bill-field { margin-bottom: 12px; }
     .bill-field-lbl { font-size: 11px; color: #94a3b8; margin-bottom: 2px; }
-    .bill-field-val { font-size: 14px; font-weight: 600; color: #0f172a; }
+    .bill-field-val { font-size: 13px; font-weight: 600; color: #0f172a; word-break: break-word; }
 
     /* Горизонтальный таббар Профиля */
     .history-tabs-container {
       width: 100%;
       border-bottom: 1px solid #e2e8f0;
       background: #f4f7fb;
-      padding: 0 16px;
-      margin-bottom: 16px;
+      padding: 0 12px;
+      margin-bottom: 14px;
     }
 
     .history-tabs {
@@ -580,15 +645,15 @@
       flex-direction: row;
       justify-content: space-around;
       align-items: center;
-      gap: 16px;
+      gap: 8px;
       width: 100%;
     }
 
     .tab-item {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: #94a3b8;
-      padding: 12px 6px;
+      padding: 10px 4px;
       position: relative;
       cursor: pointer;
       text-align: center;
@@ -628,7 +693,7 @@
       background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
       border: 1px solid #6ee7b7;
       border-radius: 20px;
-      padding: 20px;
+      padding: 16px;
       margin: 0 16px 16px;
       box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
     }
@@ -636,83 +701,83 @@
     .benefit-header-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
+      gap: 10px;
+      margin-bottom: 8px;
     }
 
     .benefit-icon-box {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
       background: #10b981;
       color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 18px;
       flex-shrink: 0;
     }
 
-    .benefit-title { font-size: 16px; font-weight: 700; color: #065f46; line-height: 1.25; }
-    .benefit-body { font-size: 13px; color: #047857; line-height: 1.45; }
+    .benefit-title { font-size: 14px; font-weight: 700; color: #065f46; line-height: 1.25; }
+    .benefit-body { font-size: 12px; color: #047857; line-height: 1.4; word-break: break-word; }
     .benefit-badge {
       display: inline-block;
-      margin-top: 10px;
+      margin-top: 8px;
       background: #059669;
       color: #ffffff;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 8px;
+      padding: 3px 8px;
+      border-radius: 6px;
     }
 
     /* График истории */
     .chart-box {
       background: #ffffff;
-      margin: 0 16px 16px;
+      margin: 0 16px 14px;
       border-radius: 20px;
-      padding: 18px;
+      padding: 16px;
     }
 
     .bars-container {
       display: flex;
       justify-content: space-around;
       align-items: flex-end;
-      height: 110px;
-      padding-top: 10px;
+      height: 100px;
+      padding-top: 8px;
     }
 
-    .bar-group { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-    .bar-pair { display: flex; align-items: flex-end; gap: 4px; height: 80px; }
-    .bar-cold { width: 8px; background: #38bdf8; border-radius: 4px; transition: height 0.3s; }
-    .bar-hot { width: 8px; background: #fca5a5; border-radius: 4px; transition: height 0.3s; }
+    .bar-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .bar-pair { display: flex; align-items: flex-end; gap: 3px; height: 75px; }
+    .bar-cold { width: 7px; background: #38bdf8; border-radius: 3px; transition: height 0.3s; }
+    .bar-hot { width: 7px; background: #fca5a5; border-radius: 3px; transition: height 0.3s; }
     .bar-label { font-size: 10px; color: #94a3b8; }
 
     .history-list {
       background: #ffffff;
       margin: 0 16px 16px;
       border-radius: 20px;
-      padding: 16px 18px;
+      padding: 14px 16px;
     }
 
     .history-item {
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
+      padding: 8px 0;
       border-bottom: 1px dashed #f1f5f9;
-      font-size: 13px;
+      font-size: 12px;
     }
     .history-item:last-child { border-bottom: none; }
 
     .master-order-btn {
       width: calc(100% - 32px);
       margin: 0 16px 16px;
-      height: 48px;
+      height: 46px;
       background: #0284c7;
       color: #ffffff;
       border: none;
-      border-radius: 14px;
-      font-size: 14px;
+      border-radius: 12px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       display: flex;
@@ -744,6 +809,7 @@
       border-radius: 16px;
       font-size: 13px;
       line-height: 1.4;
+      word-break: break-word;
     }
 
     .msg-incoming { background: #ffffff; color: #0f172a; align-self: flex-start; }
@@ -765,7 +831,8 @@
       padding: 0 16px;
       background: #ffffff;
       outline: none;
-      font-size: 14px;
+      font-size: 13px;
+      min-width: 0;
     }
 
     .bot-send-btn {
@@ -779,6 +846,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     /* Модальные окна с крестиком закрытия (✕) */
@@ -790,15 +858,15 @@
       display: none;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
     }
 
     .modal-overlay.active { display: flex; }
 
     .modal-card {
       background: #ffffff;
-      border-radius: 24px;
-      padding: 24px 20px;
+      border-radius: 22px;
+      padding: 22px 18px;
       max-width: 360px;
       width: 100%;
       text-align: center;
@@ -813,10 +881,10 @@
 
     .modal-close-x {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 32px;
-      height: 32px;
+      top: 12px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: #f1f5f9;
       border: none;
@@ -835,9 +903,9 @@
     }
 
     .modal-icon {
-      width: 60px;
-      height: 60px;
-      margin: 0 auto 14px;
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 12px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -847,16 +915,16 @@
     .modal-icon.warning { background: #ffedd5; color: #f97316; }
     .modal-icon.info { background: #e0f2fe; color: #0284c7; }
 
-    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    .modal-text { font-size: 13px; color: #475569; line-height: 1.45; margin-bottom: 18px; text-align: left; }
+    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .modal-text { font-size: 13px; color: #475569; line-height: 1.4; margin-bottom: 16px; text-align: left; word-break: break-word; }
     .modal-btn {
       width: 100%;
-      height: 46px;
+      height: 44px;
       border-radius: 12px;
       background: #0284c7;
       color: #ffffff;
       border: none;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
     }
@@ -868,9 +936,9 @@
       transform: translateX(-50%) translateY(-100px);
       background: #0f172a;
       color: #ffffff;
-      padding: 10px 18px;
-      border-radius: 30px;
-      font-size: 13px;
+      padding: 9px 16px;
+      border-radius: 25px;
+      font-size: 12px;
       font-weight: 500;
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       transition: transform 0.25s ease;
@@ -921,9 +989,9 @@
       <div class="reminder-banner">
         <div class="reminder-left">
           <div class="meter-circle-icon">
-            <i data-lucide="gauge" style="width: 22px; height: 22px;"></i>
+            <i data-lucide="gauge" style="width: 20px; height: 20px;"></i>
           </div>
-          <div style="font-size: 13px; color: #475569; line-height: 1.35;">
+          <div style="font-size: 12px; color: #475569; line-height: 1.35;">
             Передать показания через: <br>
             <span style="color: #0284c7; font-weight: 600;">3 дня 12 ч : 53 мин</span>
           </div>
@@ -933,7 +1001,7 @@
         </button>
       </div>
 
-      <!-- Заголовок раздела «Абонентский номер» (стрелочка полностью удалена) -->
+      <!-- Заголовок раздела «Абонентский номер» -->
       <div class="section-title-row">
         <div class="section-title">Абонентский номер</div>
       </div>
@@ -949,7 +1017,7 @@
         </div>
 
         <div class="account-due-row">
-          <div style="font-size: 14px; color: #475569;">Сумма к оплате:</div>
+          <div style="font-size: 13px; color: #475569;">Сумма к оплате:</div>
           <div class="account-due-amount" id="homeDueAmount">1 250 ₽</div>
         </div>
 
@@ -1081,11 +1149,13 @@
           </div>
         </div>
 
-        <!-- Поле прямого ввода цифр с клавиатуры -->
+        <!-- Адаптивный блок ввода с клавиатуры -->
         <div class="manual-meter-input-row">
           <label>Ввести показание вручную:</label>
-          <input type="number" id="manualInputCold" class="manual-meter-input" value="134" oninput="handleManualMeterInput('cold', this.value)">
-          <span style="font-size: 12px; color: #64748b; font-weight: 600;">м³</span>
+          <div class="manual-meter-input-controls">
+            <input type="number" id="manualInputCold" class="manual-meter-input" value="134" oninput="handleManualMeterInput('cold', this.value)">
+            <span style="font-size: 12px; color: #64748b; font-weight: 600;">м³</span>
+          </div>
         </div>
 
         <div class="step-buttons-row">
@@ -1118,11 +1188,13 @@
           </div>
         </div>
 
-        <!-- Поле прямого ввода цифр с клавиатуры -->
+        <!-- Адаптивный блок ввода с клавиатуры -->
         <div class="manual-meter-input-row">
           <label>Ввести показание вручную:</label>
-          <input type="number" id="manualInputHot" class="manual-meter-input" value="98" oninput="handleManualMeterInput('hot', this.value)">
-          <span style="font-size: 12px; color: #64748b; font-weight: 600;">м³</span>
+          <div class="manual-meter-input-controls">
+            <input type="number" id="manualInputHot" class="manual-meter-input" value="98" oninput="handleManualMeterInput('hot', this.value)">
+            <span style="font-size: 12px; color: #64748b; font-weight: 600;">м³</span>
+          </div>
         </div>
 
         <div class="step-buttons-row">
@@ -1153,17 +1225,17 @@
       </div>
 
       <div class="form-group-card">
-        <div style="font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="droplets" style="width: 18px; height: 18px; color: #0284c7;"></i>
+        <div style="font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="droplets" style="width: 17px; height: 17px; color: #0284c7;"></i>
           Показания к оплате
         </div>
         <div class="field-row-2">
           <div>
-            <label class="field-label" style="color: #0284c7;">Холодная вода (ХВС), м³</label>
+            <label class="field-label" style="color: #0284c7;">Холодная (ХВС), м³</label>
             <input type="number" id="payInputCold" class="field-input" value="134" oninput="syncFromPaymentInputs()">
           </div>
           <div>
-            <label class="field-label" style="color: #e11d48;">Горячая вода (ГВС), м³</label>
+            <label class="field-label" style="color: #e11d48;">Горячая (ГВС), м³</label>
             <input type="number" id="payInputHot" class="field-input" value="98" oninput="syncFromPaymentInputs()">
           </div>
         </div>
@@ -1184,14 +1256,14 @@
           </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-top: 12px;">
-          <button style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="downloadReceiptPDF()">
-            <i data-lucide="file-text" style="width: 14px; height: 14px;"></i>
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+          <button style="flex: 1; padding: 9px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;" onclick="downloadReceiptPDF()">
+            <i data-lucide="file-text" style="width: 13px; height: 13px;"></i>
             Квитанция (PDF)
           </button>
-          <button style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="sendReceiptToBot()">
-            <i data-lucide="send" style="width: 14px; height: 14px;"></i>
-            Чек в MAX
+          <button style="flex: 1; padding: 9px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;" onclick="sendReceiptToBot()">
+            <i data-lucide="send" style="width: 13px; height: 13px;"></i>
+            Чек в Telegram
           </button>
         </div>
       </div>
@@ -1272,7 +1344,7 @@
           </div>
           <div class="bill-field">
             <div class="bill-field-lbl">Основание</div>
-            <div class="bill-field-val">Закон г. Калининград № 70</div>
+            <div class="bill-field-val">Закон г. Москвы № 70</div>
           </div>
           <div class="bill-field">
             <div class="bill-field-lbl">Лицевой счёт</div>
@@ -1285,15 +1357,15 @@
       <div id="tab-content-requests" class="tab-content">
         <div class="form-group-card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <div style="font-size: 14px; font-weight: 700;">Заявка № 84920</div>
-            <span style="background: #e0f2fe; color: #0284c7; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;">В обработке</span>
+            <div style="font-size: 13px; font-weight: 700;">Заявка № 84920</div>
+            <span style="background: #e0f2fe; color: #0284c7; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 600;">В обработке</span>
           </div>
-          <div style="font-size: 13px; color: #475569; margin-bottom: 4px;">Прямой договор водоснабжения</div>
+          <div style="font-size: 12px; color: #475569; margin-bottom: 4px;">Прямой договор водоснабжения</div>
           <div style="font-size: 11px; color: #94a3b8;">Подана: 15.09.2023 • Срок ответа до 5 рабочих дней</div>
         </div>
 
         <button class="master-order-btn" onclick="openMasterModal()">
-          <i data-lucide="wrench" style="width: 18px; height: 18px;"></i>
+          <i data-lucide="wrench" style="width: 16px; height: 16px;"></i>
           Записаться на выезд мастера
         </button>
       </div>
@@ -1301,10 +1373,10 @@
       <!-- Вкладка: ИСТОРИЯ ПОКАЗАНИЙ -->
       <div id="tab-content-history" class="tab-content active">
         <div class="chart-box">
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 700; color: #475569; margin-bottom: 12px;">
-            <i data-lucide="chevron-left" style="width: 16px; height: 16px; cursor: pointer;"></i>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 10px;">
+            <i data-lucide="chevron-left" style="width: 15px; height: 15px; cursor: pointer;"></i>
             <span>2026 год (Динамика)</span>
-            <i data-lucide="chevron-right" style="width: 16px; height: 16px; cursor: pointer;"></i>
+            <i data-lucide="chevron-right" style="width: 15px; height: 15px; cursor: pointer;"></i>
           </div>
 
           <div class="bars-container">
@@ -1356,11 +1428,11 @@
             <b id="historyLiveHot">00098 м³</b>
           </div>
 
-          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 14px 0 8px;">24.09.2026</div>
+          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 12px 0 6px;">24.09.2026</div>
           <div class="history-item"><span>ХВС № 98489</span><b>00116 м³</b></div>
           <div class="history-item"><span>ГВС № 98489</span><b>00083 м³</b></div>
 
-          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 14px 0 8px;">24.08.2026</div>
+          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 12px 0 6px;">24.08.2026</div>
           <div class="history-item"><span>ХВС № 98489</span><b>00098 м³</b></div>
           <div class="history-item"><span>ГВС № 98489</span><b>00070 м³</b></div>
         </div>
@@ -1377,7 +1449,7 @@
           <button class="header-back-btn" style="color: #fff;" onclick="goToScreen('screen-home')">
             <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
           </button>
-          <h1 style="color: #fff;">Бот КВК</h1>
+          <h1 style="color: #fff;">Бот мосводоканал</h1>
         </div>
 
         <div class="bot-chat-area" id="botChatArea">
@@ -1401,7 +1473,7 @@
         <div class="bot-input-bar">
           <input type="text" id="botMsgInput" class="bot-input" placeholder="Напишите вопрос боту...">
           <button class="bot-send-btn" onclick="sendBotMessage()">
-            <i data-lucide="send" style="width: 18px; height: 18px;"></i>
+            <i data-lucide="send" style="width: 17px; height: 17px;"></i>
           </button>
         </div>
       </div>
@@ -1416,10 +1488,10 @@
     <div id="outageModal" class="modal-overlay">
       <div class="modal-card">
         <button class="modal-close-x" onclick="closeOutageModal()">
-          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+          <i data-lucide="x" style="width: 17px; height: 17px;"></i>
         </button>
         <div class="modal-icon warning">
-          <i data-lucide="droplet-off" style="width: 32px; height: 32px;"></i>
+          <i data-lucide="droplet-off" style="width: 28px; height: 28px;"></i>
         </div>
         <div class="modal-title">Отключение воды</div>
         <div class="modal-text">
@@ -1435,16 +1507,16 @@
     <div id="meterInfoModal" class="modal-overlay">
       <div class="modal-card">
         <button class="modal-close-x" onclick="closeMeterInfoModal()">
-          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+          <i data-lucide="x" style="width: 17px; height: 17px;"></i>
         </button>
         <div class="modal-icon info">
-          <i data-lucide="calendar-check" style="width: 32px; height: 32px;"></i>
+          <i data-lucide="calendar-check" style="width: 28px; height: 28px;"></i>
         </div>
         <div class="modal-title" id="infoMeterTitle">ХВС №98489</div>
         <div class="modal-text">
           <div style="margin-bottom: 8px;">
             <b>Дата отправки показаний:</b><br>
-            <span id="infoMeterDate" style="color: #0284c7; font-size: 14px; font-weight: 600;">24 сентября 2026 г., 14:32:10</span>
+            <span id="infoMeterDate" style="color: #0284c7; font-size: 13px; font-weight: 600;">24 сентября 2026 г., 14:32:10</span>
           </div>
           <div style="margin-bottom: 8px;">
             <b>Переданное значение:</b> <span id="infoMeterValue">00134 м³</span>
@@ -1464,15 +1536,15 @@
     <div id="masterModal" class="modal-overlay">
       <div class="modal-card">
         <button class="modal-close-x" onclick="closeMasterModal()">
-          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+          <i data-lucide="x" style="width: 17px; height: 17px;"></i>
         </button>
         <div class="modal-icon info">
-          <i data-lucide="calendar" style="width: 32px; height: 32px;"></i>
+          <i data-lucide="calendar" style="width: 28px; height: 28px;"></i>
         </div>
         <div class="modal-title">Вызов мастера</div>
         <div class="modal-text">
           <label class="field-label">Выберите дату визита</label>
-          <input type="date" id="masterDate" class="field-input" value="2026-10-20" style="margin-bottom: 12px;">
+          <input type="date" id="masterDate" class="field-input" value="2026-10-20" style="margin-bottom: 10px;">
           
           <label class="field-label">Интервал времени</label>
           <select id="masterSlot" class="field-input">
@@ -1501,7 +1573,7 @@
       </button>
 
       <!-- Центральная кнопка: Векторный исторический герб Мосводоканала (башня с арками и волнами) -->
-      <div class="nav-center-bubble" onclick="goToScreen('screen-bot')" title="Бот КВК">
+      <div class="nav-center-bubble" onclick="goToScreen('screen-bot')" title="Бот Мосводоканал">
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- Шпиль и шатер -->
           <path d="M50 14L50 20M50 14L49 20M50 14L51 20" stroke="#1058ca" stroke-width="2.5" stroke-linecap="round"/>
@@ -1685,7 +1757,7 @@
       for (let c of str) {
         html += `<div class="digit-cell">${c}</div>`;
       }
-      html += `<span style="font-size: 13px; color: #64748b; margin-left: 6px; align-self: flex-end; padding-bottom: 4px;">м³</span>`;
+      html += `<span class="unit-tag">м³</span>`;
       container.innerHTML = html;
     }
 
@@ -1724,8 +1796,8 @@
       document.getElementById('historyLiveCold').innerText = `${String(acc.coldVal).padStart(5, '0')} м³`;
       document.getElementById('historyLiveHot').innerText = `${String(acc.hotVal).padStart(5, '0')} м³`;
 
-      const coldBarHeight = Math.min(80, Math.max(15, coldDiff * 3));
-      const hotBarHeight = Math.min(80, Math.max(15, hotDiff * 3));
+      const coldBarHeight = Math.min(75, Math.max(12, coldDiff * 3));
+      const hotBarHeight = Math.min(75, Math.max(12, hotDiff * 3));
       document.getElementById('chartBarColdLive').style.height = `${coldBarHeight}px`;
       document.getElementById('chartBarHotLive').style.height = `${hotBarHeight}px`;
     }
@@ -1863,7 +1935,7 @@
 
     function sendReceiptToBot() {
       triggerHaptic('success');
-      showToast('Электронный чек отправлен в чат MAX!');
+      showToast('Электронный чек отправлен в чат Telegram!');
     }
 
     function submitMeters() {
@@ -1898,7 +1970,7 @@
         triggerHaptic('medium');
         const botMsg = document.createElement('div');
         botMsg.className = 'msg-bubble msg-incoming';
-        botMsg.innerHTML = `Запрос "${text}" принят в работу. Горячая линия КВК: 8 (499) 763-34-34.<div class="msg-time">Только что</div>`;
+        botMsg.innerHTML = `Запрос "${text}" принят в работу. Горячая линия Мосводоканала: 8 (499) 763-34-34.<div class="msg-time">Только что</div>`;
         chat.appendChild(botMsg);
         chat.scrollTop = chat.scrollHeight;
       }, 600);
