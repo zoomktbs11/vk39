@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Мосводоканал — Telegram Mini App</title>
+  <title>КВК — MAX Mini App</title>
   
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -1191,7 +1191,7 @@
           </button>
           <button style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="sendReceiptToBot()">
             <i data-lucide="send" style="width: 14px; height: 14px;"></i>
-            Чек в Telegram
+            Чек в MAX
           </button>
         </div>
       </div>
@@ -1272,7 +1272,7 @@
           </div>
           <div class="bill-field">
             <div class="bill-field-lbl">Основание</div>
-            <div class="bill-field-val">Закон г. Москвы № 70</div>
+            <div class="bill-field-val">Закон г. Калининград № 70</div>
           </div>
           <div class="bill-field">
             <div class="bill-field-lbl">Лицевой счёт</div>
@@ -1377,7 +1377,7 @@
           <button class="header-back-btn" style="color: #fff;" onclick="goToScreen('screen-home')">
             <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
           </button>
-          <h1 style="color: #fff;">Бот мосводоканал</h1>
+          <h1 style="color: #fff;">Бот КВК</h1>
         </div>
 
         <div class="bot-chat-area" id="botChatArea">
@@ -1501,7 +1501,7 @@
       </button>
 
       <!-- Центральная кнопка: Векторный исторический герб Мосводоканала (башня с арками и волнами) -->
-      <div class="nav-center-bubble" onclick="goToScreen('screen-bot')" title="Бот Мосводоканал">
+      <div class="nav-center-bubble" onclick="goToScreen('screen-bot')" title="Бот КВК">
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- Шпиль и шатер -->
           <path d="M50 14L50 20M50 14L49 20M50 14L51 20" stroke="#1058ca" stroke-width="2.5" stroke-linecap="round"/>
@@ -1863,7 +1863,7 @@
 
     function sendReceiptToBot() {
       triggerHaptic('success');
-      showToast('Электронный чек отправлен в чат Telegram!');
+      showToast('Электронный чек отправлен в чат MAX!');
     }
 
     function submitMeters() {
@@ -1898,7 +1898,7 @@
         triggerHaptic('medium');
         const botMsg = document.createElement('div');
         botMsg.className = 'msg-bubble msg-incoming';
-        botMsg.innerHTML = `Запрос "${text}" принят в работу. Горячая линия Мосводоканала: 8 (499) 763-34-34.<div class="msg-time">Только что</div>`;
+        botMsg.innerHTML = `Запрос "${text}" принят в работу. Горячая линия КВК: 8 (499) 763-34-34.<div class="msg-time">Только что</div>`;
         chat.appendChild(botMsg);
         chat.scrollTop = chat.scrollHeight;
       }, 600);
