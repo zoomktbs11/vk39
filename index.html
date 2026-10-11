@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Калининградводоканал — MAX Mini App</title>
+  <title>Мосводоканал — Telegram Mini App</title>
   
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -105,7 +105,7 @@
     .header-back-btn { left: 16px; }
     .header-more-btn { right: 16px; color: var(--text-muted); }
 
-    /* Переключатель мульти-аккаунта */
+    /* Переключатель мульти-аккаунта (без дублера стрелочек) */
     .account-switcher-wrap {
       margin: 0 16px 12px;
       background: #ffffff;
@@ -116,6 +116,7 @@
       justify-content: space-between;
       border: 1px solid #e2e8f0;
       box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+      position: relative;
     }
 
     .account-select {
@@ -128,6 +129,21 @@
       width: 100%;
       cursor: pointer;
       font-family: inherit;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      padding-right: 24px;
+    }
+
+    .account-select::-ms-expand {
+      display: none;
+    }
+
+    .account-switcher-arrow {
+      position: absolute;
+      right: 14px;
+      pointer-events: none;
+      color: #94a3b8;
     }
 
     /* Предупреждение об отключении воды 25 октября 2026 года */
@@ -215,7 +231,7 @@
       white-space: nowrap;
     }
 
-    /* Карточка счёта (Главная) */
+    /* Заголовки разделов (без стрелочки на Абонентском номере) */
     .section-title-row {
       display: flex;
       justify-content: space-between;
@@ -256,7 +272,7 @@
     }
     .status-pill.warning { background: #fef9c3; color: #ca8a04; }
 
-    /* Блок Другое */
+    /* Блок «Другое» */
     .services-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -289,7 +305,7 @@
       justify-content: center;
     }
 
-    /* Навигационная панель (Таббар) */
+    /* Навигационная панель */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -795,7 +811,6 @@
       to { transform: scale(1); opacity: 1; }
     }
 
-    /* Кнопка-крестик в правом верхнем углу */
     .modal-close-x {
       position: absolute;
       top: 14px;
@@ -880,14 +895,14 @@
         <h1>Главная</h1>
       </div>
 
-      <!-- Селектор объектов -->
+      <!-- Селектор объектов (одна аккуратная стрелка) -->
       <div class="account-switcher-wrap">
         <select class="account-select" id="accountSelector" onchange="switchAccount(this.value)">
           <option value="home">🏠 Квартира (ул. Добрякова, д. 1, кв. 1)</option>
           <option value="dacha">🏡 Дача (пос. Вороновское, уч. 42)</option>
           <option value="parents">👵 Квартира родителей (ул. Ленина, д. 14, кв. 8)</option>
         </select>
-        <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: #94a3b8;"></i>
+        <i data-lucide="chevron-down" class="account-switcher-arrow" style="width: 16px; height: 16px;"></i>
       </div>
 
       <!-- Оповещение об отключении воды 25 октября 2026 -->
@@ -918,9 +933,9 @@
         </button>
       </div>
 
+      <!-- Заголовок раздела «Абонентский номер» (стрелочка полностью удалена) -->
       <div class="section-title-row">
         <div class="section-title">Абонентский номер</div>
-        <i data-lucide="chevron-right" style="width: 18px; height: 18px; color: #94a3b8;"></i>
       </div>
 
       <!-- Карточка счёта на Главной -->
@@ -1066,7 +1081,7 @@
           </div>
         </div>
 
-        <!-- Поле прямого ввода цифр -->
+        <!-- Поле прямого ввода цифр с клавиатуры -->
         <div class="manual-meter-input-row">
           <label>Ввести показание вручную:</label>
           <input type="number" id="manualInputCold" class="manual-meter-input" value="134" oninput="handleManualMeterInput('cold', this.value)">
@@ -1103,7 +1118,7 @@
           </div>
         </div>
 
-        <!-- Поле прямого ввода цифр -->
+        <!-- Поле прямого ввода цифр с клавиатуры -->
         <div class="manual-meter-input-row">
           <label>Ввести показание вручную:</label>
           <input type="number" id="manualInputHot" class="manual-meter-input" value="98" oninput="handleManualMeterInput('hot', this.value)">
@@ -1176,7 +1191,7 @@
           </button>
           <button style="flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="sendReceiptToBot()">
             <i data-lucide="send" style="width: 14px; height: 14px;"></i>
-            Чек в MAX
+            Чек в Telegram
           </button>
         </div>
       </div>
@@ -1257,7 +1272,7 @@
           </div>
           <div class="bill-field">
             <div class="bill-field-lbl">Основание</div>
-            <div class="bill-field-val">Закон г. Калининград № 70</div>
+            <div class="bill-field-val">Закон г. Москвы № 70</div>
           </div>
           <div class="bill-field">
             <div class="bill-field-lbl">Лицевой счёт</div>
@@ -1362,7 +1377,7 @@
           <button class="header-back-btn" style="color: #fff;" onclick="goToScreen('screen-home')">
             <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
           </button>
-          <h1 style="color: #fff;">Бот Калининградводоканала</h1>
+          <h1 style="color: #fff;">Бот мосводоканал</h1>
         </div>
 
         <div class="bot-chat-area" id="botChatArea">
@@ -1472,7 +1487,7 @@
 
 
     <!-- ========================================== -->
-    <!-- НИЖНЯЯ ПАНЕЛЬ С НОВЫМ ЛОГОТИПОМ МОСВОДОКАНАЛА -->
+    <!-- НИЖНЯЯ ПАНЕЛЬ С ВЕКТОРНЫМ ЛОГОТИПОМ        -->
     <!-- ========================================== -->
     <div class="bottom-nav">
       <button class="nav-item active" id="nav-home" onclick="goToScreen('screen-home')">
@@ -1485,8 +1500,8 @@
         <span>Показания</span>
       </button>
 
-      <!-- Центральная кнопка: Векторный исторический логотип Мосводоканала (башня с арками и волнами) -->
-      <div class="nav-center-bubble" onclick="goToScreen('screen-bot')" title="Бот Калининградводоканала">
+      <!-- Центральная кнопка: Векторный исторический герб Мосводоканала (башня с арками и волнами) -->
+      <div class="nav-center-bubble" onclick="goToScreen('screen-bot')" title="Бот Мосводоканал">
         <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- Шпиль и шатер -->
           <path d="M50 14L50 20M50 14L49 20M50 14L51 20" stroke="#1058ca" stroke-width="2.5" stroke-linecap="round"/>
@@ -1497,9 +1512,8 @@
           <circle cx="50" cy="27" r="2.5" fill="#ffffff"/>
           <circle cx="63" cy="30" r="2.5" fill="#ffffff"/>
 
-          <!-- Верхний ярус башни с окнами -->
+          <!-- Верхний ярус башни -->
           <rect x="32.5" y="35" width="35" height="15" fill="#1058ca"/>
-          <!-- Окна верхнего яруса (решетка) -->
           <rect x="36" y="38" width="2" height="6.5" fill="#ffffff"/>
           <rect x="39.5" y="38" width="2" height="6.5" fill="#ffffff"/>
           <rect x="43" y="38" width="2" height="6.5" fill="#ffffff"/>
@@ -1512,9 +1526,8 @@
           <!-- Разделительный карниз -->
           <rect x="32" y="47.5" width="36" height="2" fill="#ffffff"/>
 
-          <!-- Средний ярус башни с окнами -->
+          <!-- Средний ярус башни -->
           <rect x="32.5" y="49.5" width="35" height="15" fill="#1058ca"/>
-          <!-- Окна среднего яруса -->
           <rect x="36" y="52" width="2" height="6.5" fill="#ffffff"/>
           <rect x="39.5" y="52" width="2" height="6.5" fill="#ffffff"/>
           <rect x="43" y="52" width="2" height="6.5" fill="#ffffff"/>
@@ -1527,12 +1540,12 @@
           <!-- Нижний ярус с тремя арками -->
           <path d="M32.5 64.5H67.5V77.5H64V68.5C64 66.5 62 65 59.5 65C57 65 55 66.5 55 68.5V77.5H52V68.5C52 66.5 50 65 47.5 65C45 65 43 66.5 43 68.5V77.5H40V68.5C40 66.5 38 65 35.5 65C33 65 32.5 66.5 32.5 68.5V77.5H32.5V64.5Z" fill="#1058ca"/>
 
-          <!-- Левые волны воды -->
+          <!-- Левые волны -->
           <path d="M12 66.5C15 64.5 19 64.5 22 66.5C25 68.5 29 68.5 32.5 66.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
           <path d="M12 71.5C15 69.5 19 69.5 22 71.5C25 73.5 29 73.5 32.5 71.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
           <path d="M12 76.5C15 74.5 19 74.5 22 76.5C25 78.5 29 78.5 32.5 76.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
 
-          <!-- Правые волны воды -->
+          <!-- Правые волны -->
           <path d="M67.5 66.5C71 64.5 75 64.5 78 66.5C81 68.5 85 68.5 88 66.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
           <path d="M67.5 71.5C71 69.5 75 69.5 78 71.5C81 73.5 85 73.5 88 71.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
           <path d="M67.5 76.5C71 74.5 75 74.5 78 76.5C81 78.5 85 78.5 88 76.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
@@ -1628,7 +1641,7 @@
       setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    // Навигация
+    // Навигация по экранам
     function goToScreen(screenId) {
       triggerHaptic('selection_change');
 
@@ -1676,14 +1689,13 @@
       container.innerHTML = html;
     }
 
-    // Синхронизация всех представлений приложения
+    // Синхронизация всех отображений
     function updateAllViews() {
       const acc = state.accounts[state.currentAccount];
 
       renderDigits('coldDigitsContainer', acc.coldVal);
       renderDigits('hotDigitsContainer', acc.hotVal);
 
-      // Синхронизация полей ручного ввода
       const manCold = document.getElementById('manualInputCold');
       const manHot = document.getElementById('manualInputHot');
       if (manCold && document.activeElement !== manCold) manCold.value = acc.coldVal;
@@ -1727,7 +1739,7 @@
       btn.innerText = `Оплатить ${label}: ${amount.toLocaleString('ru-RU')} ₽`;
     }
 
-    // Прямой ввод показаний с клавиатуры
+    // Ручной ввод показаний с клавиатуры
     function handleManualMeterInput(type, valStr) {
       const acc = state.accounts[state.currentAccount];
       const val = parseInt(valStr, 10);
@@ -1801,7 +1813,7 @@
       goToScreen('screen-home');
     }
 
-    // Модальные окна
+    // Управление модальными окнами
     function openOutageModal() {
       triggerHaptic('medium');
       document.getElementById('outageModal').classList.add('active');
@@ -1851,7 +1863,7 @@
 
     function sendReceiptToBot() {
       triggerHaptic('success');
-      showToast('Электронный чек отправлен в чат MAX!');
+      showToast('Электронный чек отправлен в чат Telegram!');
     }
 
     function submitMeters() {
@@ -1886,13 +1898,13 @@
         triggerHaptic('medium');
         const botMsg = document.createElement('div');
         botMsg.className = 'msg-bubble msg-incoming';
-        botMsg.innerHTML = `Запрос "${text}" принят в работу. Горячая линия Калининградводоканала: 8 (999) 123-45-67.<div class="msg-time">Только что</div>`;
+        botMsg.innerHTML = `Запрос "${text}" принят в работу. Горячая линия Мосводоканала: 8 (499) 763-34-34.<div class="msg-time">Только что</div>`;
         chat.appendChild(botMsg);
         chat.scrollTop = chat.scrollHeight;
       }, 600);
     }
 
-    // Старт
+    // Запуск приложения
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       updateAllViews();
