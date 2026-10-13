@@ -3,1985 +3,2373 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Мосводоканал — Telegram Mini App</title>
-  
-  <!-- Telegram Web App SDK -->
+  <title>Крутилка Номеров — Telegram Mini App</title>
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  
-  <!-- Шрифт Inter -->
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Шрифты: Inter, Oswald (ГОСТ геометрия номеров), Russo One -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Иконки Lucide -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@600;700&family=Russo+One&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tone.js для аутентичных звуков -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
 
   <style>
-    :root {
-      --bg-app: #f4f7fb;
-      --card-bg: #ffffff;
-      --primary-blue: #0284c7;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    * {
       -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
       user-select: none;
     }
-
-    html, body {
-      width: 100%;
-      min-height: 100vh;
-      overflow-x: hidden;
-      background: var(--bg-app);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-    }
-
     body {
-      display: flex;
-      justify-content: center;
-    }
-
-    .app-viewport {
-      width: 100%;
-      max-width: 480px;
-      min-height: 100vh;
-      background: #f4f7fb;
-      position: relative;
-      padding-bottom: calc(75px + var(--safe-area-bottom));
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 0 35px rgba(0,0,0,0.06);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #000000;
+      color: #f2f2f7;
+      touch-action: pan-y;
       overflow-x: hidden;
     }
 
-    /* Экраны приложения */
-    .screen {
-      display: none;
-      flex-direction: column;
-      width: 100%;
-      animation: fadeIn 0.2s ease-out;
-    }
-
-    .screen.active {
-      display: flex;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Верхний хедер */
-    .app-header {
-      padding: 16px 20px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      background: #f4f7fb;
-    }
-
-    .app-header h1 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-main);
-    }
-
-    .header-back-btn, .header-more-btn {
-      position: absolute;
-      background: none;
-      border: none;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      padding: 6px;
-    }
-
-    .header-back-btn { left: 14px; }
-    .header-more-btn { right: 14px; color: var(--text-muted); }
-
-    /* Переключатель мульти-аккаунта (без дублера стрелочек) */
-    .account-switcher-wrap {
-      margin: 0 16px 12px;
-      background: #ffffff;
-      border-radius: 14px;
-      padding: 8px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-      position: relative;
-    }
-
-    .account-select {
-      border: none;
-      background: transparent;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-main);
-      outline: none;
-      width: 100%;
-      cursor: pointer;
-      font-family: inherit;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      padding-right: 28px;
-    }
-
-    .account-select::-ms-expand {
-      display: none;
-    }
-
-    .account-switcher-arrow {
-      position: absolute;
-      right: 14px;
-      pointer-events: none;
-      color: #94a3b8;
-    }
-
-    /* Предупреждение об отключении воды 25 октября 2026 года */
-    .outage-alert-banner {
-      margin: 0 16px 14px;
-      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-      border: 1px solid #fdba74;
-      border-radius: 16px;
-      padding: 14px 16px;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-      cursor: pointer;
-      box-shadow: 0 3px 10px rgba(249, 115, 22, 0.08);
-    }
-
-    .outage-icon-box {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: #f97316;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .outage-content { flex: 1; min-width: 0; }
-    .outage-badge {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 700;
+    /* Аутентичная ГОСТ Р 50577 металлическая рамка и геометрия 520x112 */
+    .plate-font {
+      font-family: 'Oswald', 'Russo One', sans-serif;
       text-transform: uppercase;
-      color: #c2410c;
-      background: #ffedd5;
-      padding: 2px 6px;
-      border-radius: 6px;
-      margin-bottom: 4px;
+      letter-spacing: 0.5px;
     }
 
-    .outage-title { font-size: 14px; font-weight: 700; color: #9a3412; margin-bottom: 2px; }
-    .outage-desc { font-size: 12px; color: #c2410c; line-height: 1.35; word-break: break-word; }
-
-    /* Баннер срока показаний */
-    .reminder-banner {
-      background: #ffffff;
-      border-radius: 16px;
-      margin: 0 16px 16px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-
-    .reminder-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .meter-circle-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: #f0f9ff;
-      border: 1px solid #bae6fd;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #0284c7;
-      flex-shrink: 0;
-    }
-
-    .remind-bot-btn {
-      background: #e0f2fe;
-      border: 1px solid #bae6fd;
-      color: #0284c7;
-      border-radius: 10px;
-      padding: 7px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* Заголовки разделов (без стрелочки на Абонентском номере) */
-    .section-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 20px 10px;
-    }
-
-    .section-title { font-size: 16px; font-weight: 700; color: #0f172a; }
-
-    .account-card {
-      background: #ffffff;
-      margin: 0 16px 20px;
-      border-radius: 20px;
-      padding: 18px 20px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
-      cursor: pointer;
-      border: 1px solid #edf2f7;
-    }
-
-    .account-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-    }
-
-    .account-name { font-size: 17px; font-weight: 700; }
-    .account-sub { font-size: 12px; color: #94a3b8; margin-bottom: 14px; word-break: break-word; }
-    .account-due-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .account-due-amount { font-size: 18px; font-weight: 700; }
-
-    .status-pill {
-      display: inline-block;
-      padding: 5px 12px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .status-pill.warning { background: #fef9c3; color: #ca8a04; }
-
-    /* Блок «Другое» (адаптивная сетка) */
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      padding: 0 16px 20px;
-    }
-
-    .service-btn {
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 12px 8px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 116px;
-      border: 1px solid #f1f5f9;
-      cursor: pointer;
-      text-align: left;
-    }
-
-    .service-btn-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: #334155;
-      line-height: 1.25;
-      word-break: break-word;
-    }
-
-    .service-icon-box {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      background: #f0f9ff;
-      color: #38bdf8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Навигационная панель */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 480px;
-      height: calc(65px + var(--safe-area-bottom));
-      padding-bottom: var(--safe-area-bottom);
-      background: #ffffff;
-      border-top: 1px solid #e2e8f0;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      z-index: 100;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #94a3b8;
-      font-size: 10px;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      width: 20%;
-    }
-
-    .nav-item.active { color: #0284c7; font-weight: 600; }
-
-    /* Центральная круглая кнопка с гербом Мосводоканала */
-    .nav-center-bubble {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
-      border: 3px solid #0ea5e9;
-      margin-top: -16px;
-      cursor: pointer;
-      overflow: hidden;
-      transition: transform 0.15s ease;
-      padding: 6px;
-      flex-shrink: 0;
-    }
-
-    .nav-center-bubble:active {
-      transform: scale(0.92);
-    }
-
-    .nav-center-bubble svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    /* Карточки форм */
-    .form-group-card {
-      background: #ffffff;
-      margin: 0 16px 16px;
-      border-radius: 20px;
-      padding: 16px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    }
-
-    .field-wrap { margin-bottom: 14px; }
-    .field-wrap:last-child { margin-bottom: 0; }
-    .field-label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px; display: block; }
-    .field-input {
-      width: 100%;
-      height: 44px;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      padding: 0 12px;
-      font-size: 14px;
-      color: #0f172a;
-      outline: none;
-      font-family: inherit;
-    }
-    .field-input:focus { border-color: #0284c7; background: #fff; }
-    .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .action-btn-main {
-      margin: 12px 16px 20px;
-      background: #0284c7;
-      color: #ffffff;
-      height: 50px;
+    .plate-outer-frame {
+      position: relative;
+      background: linear-gradient(180deg, #2a2a2c 0%, #1c1c1e 48%, #121214 100%);
+      padding: 5px;
       border-radius: 14px;
-      border: none;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.95), 0 0 1px 1px rgba(255, 255, 255, 0.12);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .plate-body {
+      position: relative;
+      background: linear-gradient(180deg, #ffffff 0%, #fafbfc 55%, #eceff3 100%);
+      border: 3.5px solid #000000;
+      border-radius: 9px;
+      box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.95), inset 0 -2px 3px rgba(0, 0, 0, 0.3);
+      color: #000000;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
-    }
-
-    /* Экран показаний */
-    .meter-card {
-      background: #ffffff;
-      margin: 0 16px 14px;
-      border-radius: 20px;
-      padding: 16px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    }
-
-    .meter-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .meter-title { font-size: 13px; font-weight: 700; }
-    .meter-title.cold { color: #0284c7; }
-    .meter-title.hot { color: #e11d48; }
-
-    .info-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #64748b;
-      cursor: pointer;
-      transition: background 0.15s;
-      flex-shrink: 0;
-    }
-    .info-btn:active { background: #e2e8f0; }
-
-    .meter-values-row {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    /* Адаптивные барабанчики цифр */
-    .meter-digits-box {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      flex-wrap: nowrap;
-    }
-
-    .digit-cell {
-      width: clamp(24px, 6.8vw, 32px);
-      height: clamp(34px, 9.2vw, 42px);
-      background: #f1f5f9;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: clamp(15px, 4.4vw, 19px);
-      font-weight: 700;
-      color: #0f172a;
-      border: 1px solid #e2e8f0;
-      flex-shrink: 0;
-    }
-
-    .unit-tag {
-      font-size: 12px;
-      color: #64748b;
-      margin-left: 4px;
-      font-weight: 600;
-    }
-
-    .consumption-box { text-align: right; flex-shrink: 0; }
-    .consumption-label { font-size: 11px; color: #94a3b8; }
-    .consumption-value { font-size: 17px; font-weight: 700; color: #94a3b8; }
-
-    /* Оптимизированный адаптивный блок прямого ввода показаний */
-    .manual-meter-input-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 10px;
-      background: #f8fafc;
-      border: 1px dashed #cbd5e1;
-      border-radius: 12px;
-      padding: 8px 10px;
-      width: 100%;
-    }
-
-    .manual-meter-input-row label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #475569;
-      flex: 1 1 auto;
-      min-width: 0;
-      line-height: 1.25;
-      word-break: break-word;
-    }
-
-    .manual-meter-input-controls {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      flex: 0 0 auto;
-      max-width: 130px;
-    }
-
-    .manual-meter-input {
-      width: 85px;
-      height: 36px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 0 8px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #0f172a;
-      outline: none;
-      text-align: right;
-      font-family: inherit;
-      -webkit-appearance: none;
-      -moz-appearance: textfield;
-      appearance: none;
-    }
-
-    .manual-meter-input::-webkit-outer-spin-button,
-    .manual-meter-input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    .manual-meter-input:focus { border-color: #0284c7; }
-
-    /* Адаптивные шаговые кнопки */
-    .step-buttons-row {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-    }
-
-    .step-btn {
-      flex: 1 1 0;
-      min-width: 0;
-      height: 38px;
-      border-radius: 10px;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      font-size: 13px;
-      font-weight: 600;
-      color: #334155;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .anomaly-badge {
-      display: none;
-      margin-top: 10px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #b91c1c;
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      line-height: 1.3;
-    }
-
-    /* Экран оплаты (адаптивный селектор методов) */
-    .payment-method-selector {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-      width: 100%;
-    }
-
-    .pay-method-pill {
-      flex: 1 1 0;
-      min-width: 0;
-      padding: 10px 4px;
-      border-radius: 12px;
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
-      font-size: 12px;
-      font-weight: 600;
-      color: #334155;
-      text-align: center;
-      cursor: pointer;
-      white-space: nowrap;
+      align-items: stretch;
       overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .pay-method-pill.active {
-      border-color: #0284c7;
-      background: #f0f9ff;
-      color: #0284c7;
-    }
-
-    .bill-field { margin-bottom: 12px; }
-    .bill-field-lbl { font-size: 11px; color: #94a3b8; margin-bottom: 2px; }
-    .bill-field-val { font-size: 13px; font-weight: 600; color: #0f172a; word-break: break-word; }
-
-    /* Горизонтальный таббар Профиля */
-    .history-tabs-container {
-      width: 100%;
-      border-bottom: 1px solid #e2e8f0;
-      background: #f4f7fb;
-      padding: 0 12px;
-      margin-bottom: 14px;
-    }
-
-    .history-tabs {
-      display: flex;
-      flex-direction: row;
-      justify-content: space-around;
-      align-items: center;
-      gap: 8px;
+      height: 94px;
       width: 100%;
     }
 
-    .tab-item {
-      font-size: 13px;
-      font-weight: 600;
-      color: #94a3b8;
-      padding: 10px 4px;
-      position: relative;
-      cursor: pointer;
-      text-align: center;
-      white-space: nowrap;
-      transition: color 0.15s ease;
-    }
-
-    .tab-item.active {
-      color: #0284c7;
-      font-weight: 700;
-    }
-
-    .tab-item.active::after {
-      content: '';
+    /* Изумрудное атмосферное свечение за номером как в оригинале */
+    .plate-ambient-glow {
       position: absolute;
-      bottom: -1px;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: #0284c7;
-      border-radius: 3px 3px 0 0;
+      inset: -30px -20px;
+      background: radial-gradient(circle 240px at center, rgba(34, 197, 94, 0.22) 0%, rgba(16, 75, 32, 0.08) 50%, transparent 80%);
+      pointer-events: none;
+      z-index: 0;
     }
 
-    /* Изоляция вкладок */
-    .tab-content {
-      display: none !important;
-      width: 100%;
-    }
-
-    .tab-content.active {
-      display: block !important;
-      animation: fadeIn 0.2s ease-out;
-    }
-
-    /* Карточка льгот */
-    .pensioner-benefit-card {
-      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-      border: 1px solid #6ee7b7;
-      border-radius: 20px;
-      padding: 16px;
-      margin: 0 16px 16px;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
-    }
-
-    .benefit-header-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .benefit-icon-box {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: #10b981;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-    }
-
-    .benefit-title { font-size: 14px; font-weight: 700; color: #065f46; line-height: 1.25; }
-    .benefit-body { font-size: 12px; color: #047857; line-height: 1.4; word-break: break-word; }
-    .benefit-badge {
-      display: inline-block;
-      margin-top: 8px;
-      background: #059669;
-      color: #ffffff;
-      font-size: 10px;
+    /* Штампованные буквы и цифры ГОСТ с эффектом выдавливания */
+    .gost-char {
+      font-family: 'Oswald', 'Russo One', sans-serif;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-    }
-
-    /* График истории */
-    .chart-box {
-      background: #ffffff;
-      margin: 0 16px 14px;
-      border-radius: 20px;
-      padding: 16px;
-    }
-
-    .bars-container {
-      display: flex;
-      justify-content: space-around;
-      align-items: flex-end;
-      height: 100px;
-      padding-top: 8px;
-    }
-
-    .bar-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-    .bar-pair { display: flex; align-items: flex-end; gap: 3px; height: 75px; }
-    .bar-cold { width: 7px; background: #38bdf8; border-radius: 3px; transition: height 0.3s; }
-    .bar-hot { width: 7px; background: #fca5a5; border-radius: 3px; transition: height 0.3s; }
-    .bar-label { font-size: 10px; color: #94a3b8; }
-
-    .history-list {
-      background: #ffffff;
-      margin: 0 16px 16px;
-      border-radius: 20px;
-      padding: 14px 16px;
-    }
-
-    .history-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px dashed #f1f5f9;
-      font-size: 12px;
-    }
-    .history-item:last-child { border-bottom: none; }
-
-    .master-order-btn {
-      width: calc(100% - 32px);
-      margin: 0 16px 16px;
-      height: 46px;
-      background: #0284c7;
-      color: #ffffff;
-      border: none;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
+      line-height: 1;
+      color: #050505;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.95), 0 -1px 1px rgba(0, 0, 0, 0.7);
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      letter-spacing: 0.5px;
     }
 
-    /* Чат-бот */
-    .bot-screen-container {
-      background: linear-gradient(180deg, #0ea5e9 0%, #0284c7 100%);
-      min-height: calc(100vh - 75px);
-      display: flex;
-      flex-direction: column;
+    .gost-letter {
+      font-size: 58px;
+      line-height: 0.9;
     }
 
-    .bot-chat-area {
-      flex: 1;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow-y: auto;
+    .gost-digit {
+      font-size: 80px;
+      line-height: 0.88;
+      letter-spacing: 1px;
     }
 
-    .msg-bubble {
-      max-width: 82%;
-      padding: 12px 14px;
-      border-radius: 16px;
-      font-size: 13px;
-      line-height: 1.4;
-      word-break: break-word;
+    .gost-region {
+      font-size: 54px;
+      line-height: 0.88;
+      letter-spacing: -0.5px;
     }
 
-    .msg-incoming { background: #ffffff; color: #0f172a; align-self: flex-start; }
-    .msg-outgoing { background: #38bdf8; color: #ffffff; align-self: flex-end; }
-    .msg-time { font-size: 10px; opacity: 0.7; text-align: right; margin-top: 4px; }
-
-    .bot-input-bar {
-      padding: 12px 16px;
-      display: flex;
-      gap: 10px;
-      background: rgba(0,0,0,0.15);
+    /* Анимация прокрутки барабана */
+    @keyframes slotRollingAnim {
+      0% { transform: translateY(0) scale(0.99); filter: blur(0px); }
+      30% { transform: translateY(-3px) scale(1.01); filter: blur(2px); }
+      70% { transform: translateY(3px) scale(0.99); filter: blur(1.5px); }
+      100% { transform: translateY(0) scale(1); filter: blur(0px); }
+    }
+    .slot-rolling {
+      animation: slotRollingAnim 0.08s infinite linear;
     }
 
-    .bot-input {
-      flex: 1;
-      height: 42px;
-      border-radius: 20px;
-      border: none;
-      padding: 0 16px;
-      background: #ffffff;
-      outline: none;
-      font-size: 13px;
-      min-width: 0;
+    @keyframes dropImpactPop {
+      0% { transform: scale(1.05) translateY(-5px); }
+      60% { transform: scale(0.98) translateY(2px); }
+      100% { transform: scale(1) translateY(0); }
+    }
+    .plate-drop-pop {
+      animation: dropImpactPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .bot-send-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: #ffffff;
-      color: #0284c7;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      flex-shrink: 0;
+    /* Свечение пластины по редкостям */
+    .glow-rarity-0 { box-shadow: 0 0 16px rgba(142, 142, 147, 0.15), 0 16px 36px rgba(0,0,0,0.95); }
+    .glow-rarity-1 { box-shadow: 0 0 28px rgba(34, 197, 94, 0.45), 0 16px 36px rgba(0,0,0,0.95); }
+    .glow-rarity-2 { box-shadow: 0 0 38px rgba(10, 132, 255, 0.55), 0 16px 36px rgba(0,0,0,0.95); }
+    .glow-rarity-3 { box-shadow: 0 0 46px rgba(191, 90, 242, 0.65), 0 16px 36px rgba(0,0,0,0.95); }
+    .glow-rarity-4 { box-shadow: 0 0 55px rgba(255, 214, 10, 0.85), 0 0 20px rgba(245, 158, 11, 0.7); }
+    .glow-rarity-5 { box-shadow: 0 0 65px rgba(239, 68, 68, 0.95), 0 0 30px rgba(220, 38, 38, 0.8); }
+    .glow-rarity-6 { 
+      box-shadow: 0 0 80px rgba(168, 85, 247, 0.95), 0 0 45px rgba(56, 189, 248, 0.9);
+      animation: rainbowGlowPulse 2.5s infinite alternate ease-in-out;
     }
 
-    /* Модальные окна с крестиком закрытия (✕) */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
+    @keyframes rainbowGlowPulse {
+      0% { box-shadow: 0 0 60px rgba(168, 85, 247, 0.9), 0 0 30px rgba(59, 130, 246, 0.7); }
+      50% { box-shadow: 0 0 80px rgba(236, 72, 153, 0.9), 0 0 40px rgba(234, 179, 8, 0.7); }
+      100% { box-shadow: 0 0 70px rgba(34, 197, 94, 0.9), 0 0 40px rgba(168, 85, 247, 0.8); }
     }
 
-    .modal-overlay.active { display: flex; }
-
-    .modal-card {
-      background: #ffffff;
-      border-radius: 22px;
-      padding: 22px 18px;
-      max-width: 360px;
-      width: 100%;
-      text-align: center;
-      position: relative;
-      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Анимация кинематографического дропа для Мифических и Секретных */
+    @keyframes epicShockwave {
+      0% { transform: scale(0.85); filter: brightness(2.5) contrast(1.5); }
+      40% { transform: scale(1.08) rotate(-1deg); filter: brightness(1.6); }
+      75% { transform: scale(0.97) rotate(0.5deg); filter: brightness(1.2); }
+      100% { transform: scale(1) rotate(0); filter: brightness(1); }
+    }
+    .epic-shockwave-anim {
+      animation: epicShockwave 0.75s cubic-bezier(0.2, 0.9, 0.3, 1.3) forwards;
     }
 
-    @keyframes modalPop {
-      from { transform: scale(0.92); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    @keyframes flashOverlayAnim {
+      0% { opacity: 0.9; }
+      100% { opacity: 0; pointer-events: none; }
+    }
+    .flash-overlay {
+      animation: flashOverlayAnim 0.7s ease-out forwards;
     }
 
-    .modal-close-x {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: #f1f5f9;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #64748b;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-      z-index: 5;
+    /* Пульсация последнего клевера */
+    @keyframes cloverPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 214, 10, 0); }
+      50% { transform: scale(1.05); box-shadow: 0 0 18px rgba(255, 214, 10, 0.85); }
+    }
+    .clover-super-pulse {
+      animation: cloverPulse 0.9s infinite ease-in-out;
+      border-color: #ffd60a !important;
+      background-color: #2c2409 !important;
     }
 
-    .modal-close-x:active {
-      background: #e2e8f0;
-      transform: scale(0.9);
+    /* Плавающие дельты списания и начисления */
+    @keyframes floatUpFade {
+      0% { opacity: 0; transform: translateY(6px); }
+      20% { opacity: 1; transform: translateY(0); }
+      80% { opacity: 1; transform: translateY(-4px); }
+      100% { opacity: 0; transform: translateY(-12px); }
+    }
+    .balance-delta-anim {
+      animation: floatUpFade 1.2s ease-out forwards;
     }
 
-    .modal-icon {
-      width: 54px;
-      height: 54px;
-      margin: 0 auto 12px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-icon.warning { background: #ffedd5; color: #f97316; }
-    .modal-icon.info { background: #e0f2fe; color: #0284c7; }
-
-    .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-    .modal-text { font-size: 13px; color: #475569; line-height: 1.4; margin-bottom: 16px; text-align: left; word-break: break-word; }
-    .modal-btn {
-      width: 100%;
-      height: 44px;
-      border-radius: 12px;
-      background: #0284c7;
-      color: #ffffff;
-      border: none;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .toast-msg {
-      position: fixed;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-100px);
-      background: #0f172a;
-      color: #ffffff;
-      padding: 9px 16px;
-      border-radius: 25px;
-      font-size: 12px;
-      font-weight: 500;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      transition: transform 0.25s ease;
-      z-index: 300;
-      white-space: nowrap;
-    }
-
-    .toast-msg.show { transform: translateX(-50%) translateY(0); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body>
+<body class="flex justify-center bg-[#000000] min-h-screen">
 
-  <div class="app-viewport">
-    
-    <div id="toast" class="toast-msg">Данные обновлены</div>
+  <!-- Контейнер Telegram Mini App в оригинальных тёмных тонах -->
+  <div class="w-full max-w-md bg-[#000000] min-h-screen flex flex-col justify-between relative shadow-2xl overflow-hidden pb-16 border-x border-[#1c1c1e]">
 
-    <!-- ========================================== -->
-    <!-- 1. ЭКРАН: ГЛАВНАЯ                          -->
-    <!-- ========================================== -->
-    <div id="screen-home" class="screen active">
-      <div class="app-header">
-        <h1>Главная</h1>
-      </div>
-
-      <!-- Селектор объектов (одна аккуратная стрелка) -->
-      <div class="account-switcher-wrap">
-        <select class="account-select" id="accountSelector" onchange="switchAccount(this.value)">
-          <option value="home">🏠 Квартира (ул. Добрякова, д. 1, кв. 1)</option>
-          <option value="dacha">🏡 Дача (пос. Вороновское, уч. 42)</option>
-          <option value="parents">👵 Квартира родителей (ул. Ленина, д. 14, кв. 8)</option>
-        </select>
-        <i data-lucide="chevron-down" class="account-switcher-arrow" style="width: 16px; height: 16px;"></i>
-      </div>
-
-      <!-- Оповещение об отключении воды 25 октября 2026 -->
-      <div class="outage-alert-banner" onclick="openOutageModal()">
-        <div class="outage-icon-box">
-          <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
-        </div>
-        <div class="outage-content">
-          <div class="outage-badge">Плановые работы</div>
-          <div class="outage-title">Отключение воды 25 окт 2026</div>
-          <div class="outage-desc">По вашему адресу <b id="outageAddressDisplay">ул. Добрякова, д. 1</b> будет отключено водоснабжение с 09:00 до 20:00. Нажмите для деталей.</div>
-        </div>
-      </div>
-
-      <!-- Срок передачи показаний -->
-      <div class="reminder-banner">
-        <div class="reminder-left">
-          <div class="meter-circle-icon">
-            <i data-lucide="gauge" style="width: 20px; height: 20px;"></i>
-          </div>
-          <div style="font-size: 12px; color: #475569; line-height: 1.35;">
-            Передать показания через: <br>
-            <span style="color: #0284c7; font-weight: 600;">3 дня 12 ч : 53 мин</span>
-          </div>
-        </div>
-        <button class="remind-bot-btn" onclick="scheduleBotReminder()">
-          Напомнить 15-го
+    <!-- ВЕРХНЯЯ ШАПКА -->
+    <header class="px-4 pt-3 pb-2.5 flex items-center justify-between border-b border-[#1c1c1e] z-20 sticky top-0 bg-[#000000]/95 backdrop-blur-md">
+      <!-- Меню и Уровень XP -->
+      <div class="flex items-center gap-2">
+        <button id="btnSideMenu" onclick="showToast('Профиль игрока')" class="w-9 h-9 rounded-full bg-[#1c1c1e] border border-[#2c2c2e] flex items-center justify-center text-white active:scale-95 transition">
+          <i data-lucide="menu" class="w-4 h-4 text-white"></i>
         </button>
-      </div>
 
-      <!-- Заголовок раздела «Абонентский номер» -->
-      <div class="section-title-row">
-        <div class="section-title">Абонентский номер</div>
-      </div>
-
-      <!-- Карточка счёта на Главной -->
-      <div class="account-card" onclick="goToScreen('screen-form')">
-        <div class="account-card-header">
-          <div class="account-name" id="homeAccountTitle">Дом</div>
-          <div style="color: #38bdf8; font-weight: 800; font-size: 18px; letter-spacing: 2px;">•••</div>
-        </div>
-        <div class="account-sub" id="homeCardAddress">
-          Адрес: ул. Добрякова, д. 1, кв. 1 • Лицевой: 472 383 813
-        </div>
-
-        <div class="account-due-row">
-          <div style="font-size: 13px; color: #475569;">Сумма к оплате:</div>
-          <div class="account-due-amount" id="homeDueAmount">1 250 ₽</div>
-        </div>
-
-        <div>
-          <span class="status-pill warning">Показания не переданы</span>
-        </div>
-
-        <div style="margin-top: 10px; font-size: 11px; color: #0284c7; display: flex; align-items: center; gap: 4px; font-weight: 500;">
-          <i data-lucide="edit-3" style="width: 12px; height: 12px;"></i>
-          Нажмите, чтобы изменить ФИО, адрес, этаж или кадастровый номер
-        </div>
-      </div>
-
-      <div class="section-title-row">
-        <div class="section-title">Другое</div>
-      </div>
-
-      <div class="services-grid">
-        <div class="service-btn" onclick="openMasterModal()">
-          <div class="service-btn-title">Поверка или замена прибора</div>
-          <div class="service-icon-box">
-            <i data-lucide="settings" style="width: 18px; height: 18px;"></i>
+        <div id="levelPill" class="flex flex-col justify-center bg-[#1c1c1e] px-3 py-1 rounded-full border border-[#2c2c2e] shadow-inner cursor-pointer active:scale-95 transition min-w-[105px]">
+          <div class="flex items-center justify-between gap-1.5">
+            <span class="text-xs font-black text-white flex items-center gap-1">
+              <span>Ур.</span>
+              <span id="userLevel" class="text-[#22c55e]">1</span>
+            </span>
+            <span class="text-[10px] font-bold text-[#8e8e93] font-mono" id="xpText">0/500</span>
           </div>
-        </div>
-
-        <div class="service-btn" onclick="goToScreen('screen-form')">
-          <div class="service-btn-title">Заявка на прямой договор</div>
-          <div class="service-icon-box">
-            <i data-lucide="file-text" style="width: 18px; height: 18px;"></i>
-          </div>
-        </div>
-
-        <div class="service-btn" onclick="goToScreen('screen-form')">
-          <div class="service-btn-title">Добавить абонентский номер</div>
-          <div class="service-icon-box">
-            <i data-lucide="user-plus" style="width: 18px; height: 18px;"></i>
+          <div class="w-full h-1.5 bg-[#2c2c2e] rounded-full overflow-hidden mt-0.5">
+            <div id="levelProgress" class="h-full bg-[#22c55e] rounded-full w-0 transition-all duration-300"></div>
           </div>
         </div>
       </div>
-    </div>
 
-
-    <!-- ========================================== -->
-    <!-- 2. ЭКРАН: ЗАПОЛНЕНИЕ ДАННЫХ АБОНЕНТА       -->
-    <!-- ========================================== -->
-    <div id="screen-form" class="screen">
-      <div class="app-header">
-        <button class="header-back-btn" onclick="goToScreen('screen-home')">
-          <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
-        </button>
-        <h1>Данные абонента</h1>
+      <!-- Клевер / Удача (100 -> 1) -->
+      <div class="flex items-center gap-1.5 bg-[#1c1c1e] px-3 py-1.5 rounded-full border border-[#2c2c2e] shadow-sm cursor-pointer active:scale-95 transition" id="cloverBadge" title="Запас клеверов">
+        <span class="text-base" id="cloverIcon">🍀</span>
+        <span class="text-xs font-black text-white" id="luckNumber">100</span>
+        <span class="text-[10px] bg-[#ffd60a] text-black font-black px-1.5 py-0.5 rounded-md" id="luckMultiplierBadge">x1</span>
       </div>
 
-      <div class="form-group-card">
-        <div class="field-row-2 field-wrap">
-          <div>
-            <label class="field-label">Имя</label>
-            <input type="text" id="inputFirstName" class="field-input" value="Иван">
-          </div>
-          <div>
-            <label class="field-label">Фамилия</label>
-            <input type="text" id="inputLastName" class="field-input" value="Иванов">
-          </div>
+      <!-- Баланс игрока -->
+      <div class="text-right relative min-w-[95px] cursor-pointer" onclick="showToast('Текущий игровой баланс')">
+        <div class="text-[10px] text-[#8e8e93] uppercase tracking-wider font-semibold">Баланс</div>
+        <div class="text-sm font-black text-white tracking-tight flex items-center justify-end gap-1 font-mono">
+          <span id="userBalance">100 000</span> <span class="text-white font-normal">₽</span>
         </div>
-
-        <div class="field-wrap">
-          <label class="field-label">Адрес (улица и дом)</label>
-          <input type="text" id="inputAddress" class="field-input" value="ул. Добрякова, д. 1">
-        </div>
-
-        <div class="field-row-2 field-wrap">
-          <div>
-            <label class="field-label">Квартира</label>
-            <input type="text" id="inputApartment" class="field-input" value="1">
-          </div>
-          <div>
-            <label class="field-label">Этаж</label>
-            <input type="number" id="inputFloor" class="field-input" value="3">
-          </div>
-        </div>
-
-        <div class="field-wrap">
-          <label class="field-label">Кадастровый номер</label>
-          <input type="text" id="inputCadastral" class="field-input" value="77:01:0001001:1024">
-          <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Формат: 77:XX:XXXXXXX:XXXX (по данным ЕГРН)</div>
-        </div>
+        <div id="balanceDelta" class="absolute -bottom-4 right-0 text-[11px] font-extrabold font-mono pointer-events-none hidden"></div>
       </div>
+    </header>
 
-      <button class="action-btn-main" onclick="saveSubscriberData()">
-        Сохранить данные
+    <!-- ВКЛАДКИ: Номера / Машины / Магазин -->
+    <div class="px-4 pt-2.5 flex items-center gap-2">
+      <div class="flex-1 bg-[#1c1c1e] p-1 rounded-2xl flex border border-[#2c2c2e]">
+        <button id="tabBtnPlates" onclick="switchAppTab('plates')" class="flex-1 py-1.5 text-xs font-bold rounded-xl bg-[#3a3a3c] text-white shadow transition">Номера</button>
+        <button id="tabBtnCars" onclick="switchAppTab('cars')" class="flex-1 py-1.5 text-xs font-bold rounded-xl text-[#8e8e93] hover:text-white transition">Машины</button>
+      </div>
+      <button onclick="addShopBonus()" class="bg-[#ffd60a] text-black text-xs font-black px-3.5 py-2 rounded-2xl flex items-center gap-1 shadow-lg active:scale-95 transition">
+        <i data-lucide="star" class="w-3.5 h-3.5 fill-black"></i> Магазин
       </button>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- 3. ЭКРАН: ПЕРЕДАЧА ПОКАЗАНИЙ               -->
-    <!-- ========================================== -->
-    <div id="screen-meters" class="screen">
-      <div class="app-header">
-        <button class="header-back-btn" onclick="goToScreen('screen-home')">
-          <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
-        </button>
-        <h1>Показания</h1>
-      </div>
-
-      <div style="padding: 0 20px 12px;">
-        <div style="font-size: 15px; font-weight: 700; color: #0f172a;">Абонентский номер</div>
-        <div style="font-size: 12px; color: #64748b;" id="meterScreenAccountLabel">Дом | 472 383 813</div>
-        <div style="font-size: 11px; color: #94a3b8;" id="meterScreenAddressLabel">ул. Добрякова, д. 1, кв. 1</div>
-      </div>
-
-      <!-- ХОЛОДНАЯ ВОДА (ХВС) -->
-      <div class="meter-card">
-        <div class="meter-header">
-          <span class="meter-title cold">ХВС №98489</span>
-          <div class="info-btn" onclick="openMeterInfoModal('cold')">
-            <i data-lucide="info" style="width: 16px; height: 16px;"></i>
+    <!-- РАЗДЕЛ 1: НОМЕРА (ПРОКРУТКА) -->
+    <div id="sectionPlatesView" class="flex-1 flex flex-col justify-between">
+      <!-- Оповещение супер-удачи на 1 клевере -->
+      <div id="superLuckBanner" class="px-4 pt-2 hidden">
+        <div class="bg-[#2c2409] border-2 border-[#ffd60a] rounded-2xl p-2.5 flex items-center gap-2.5 shadow-[0_0_25px_rgba(255,214,10,0.35)] animate-pulse">
+          <div class="text-2xl">⚡</div>
+          <div class="flex-1">
+            <div class="text-xs font-black text-[#ffd60a] uppercase tracking-wide">Супер-Удача на последнем клевере!</div>
+            <div class="text-[11px] text-yellow-100 font-medium">Выигрыш ×5 и высокий шанс на спецсерии!</div>
           </div>
         </div>
+      </div>
 
-        <div class="meter-values-row">
+      <!-- ЦЕНТРАЛЬНАЯ ИГРОВАЯ ОБЛАСТЬ С ИЗУМРУДНОЙ АУРОЙ -->
+      <main class="flex-1 px-4 py-3 flex flex-col justify-center relative">
+        <div class="plate-ambient-glow" id="plateAmbientGlowEl"></div>
+        <div id="screenFlashFX" class="fixed inset-0 z-40 bg-white pointer-events-none hidden"></div>
+        
+        <!-- Шапка редкости и цены -->
+        <div class="flex items-center justify-between mb-2 px-1 relative z-10">
           <div>
-            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;">Текущие показания</div>
-            <div class="meter-digits-box" id="coldDigitsContainer"></div>
+            <div id="rarityName" class="text-sm font-extrabold text-[#22c55e] flex items-center gap-1.5">
+              <span>Необычный</span>
+              <span id="rarityXpBadge" class="text-[10px] bg-[#22c55e]/15 text-[#22c55e] px-1.5 py-0.5 rounded font-mono font-bold">+5 XP</span>
+            </div>
+            <div class="flex items-center gap-1 mt-1.5" id="rarityBars">
+              <!-- 10 сегментов шкалы -->
+            </div>
           </div>
-          <div class="consumption-box">
-            <div class="consumption-label">Расход</div>
-            <div class="consumption-value" id="coldConsumptionDisplay">018</div>
-          </div>
-        </div>
-
-        <!-- Адаптивный блок ввода с клавиатуры -->
-        <div class="manual-meter-input-row">
-          <label>Ввести показание вручную:</label>
-          <div class="manual-meter-input-controls">
-            <input type="number" id="manualInputCold" class="manual-meter-input" value="134" oninput="handleManualMeterInput('cold', this.value)">
-            <span style="font-size: 12px; color: #64748b; font-weight: 600;">м³</span>
+          <div class="text-right">
+            <div id="platePrice" class="text-xl font-black text-[#22c55e] tracking-tight font-mono">2 763 ₽</div>
           </div>
         </div>
 
-        <div class="step-buttons-row">
-          <button class="step-btn" onclick="adjustMeterVal('cold', -1)">-1 м³</button>
-          <button class="step-btn" onclick="adjustMeterVal('cold', +1)">+1 м³</button>
-        </div>
+        <!-- Аутентичный ГОСТ Р 50577 License Plate -->
+        <div class="relative py-1.5 flex items-center justify-center z-10">
+          <div id="plateOuterGlow" class="plate-outer-frame w-full glow-rarity-1">
+            <div id="licensePlateContainer" class="plate-body">
+              
+              <!-- Основная секция: Буква + 3 Цифры + 2 Буквы -->
+              <div class="flex-1 flex items-center justify-between px-3.5 py-1 border-r-[3.5px] border-black relative overflow-hidden bg-inherit">
+                <div class="w-[18%] flex justify-center items-center">
+                  <span id="plateLetterFirst" class="gost-char gost-letter">Е</span>
+                </div>
+                <div id="plateDigitsGroup" class="w-[52%] flex items-center justify-center gap-0.5">
+                  <span id="digit1" class="gost-char gost-digit">0</span>
+                  <span id="digit2" class="gost-char gost-digit">6</span>
+                  <span id="digit3" class="gost-char gost-digit">9</span>
+                </div>
+                <div class="w-[30%] flex items-center justify-center gap-0.5">
+                  <span id="plateLetterSecond" class="gost-char gost-letter">К</span>
+                  <span id="plateLetterThird" class="gost-char gost-letter">Е</span>
+                </div>
+              </div>
 
-        <div class="anomaly-badge" id="coldAnomalyBadge">
-          ⚠️ Расход превышает средний в 3 раза! Проверьте данные.
-        </div>
-      </div>
+              <!-- Правая секция: Регион + RUS + Триколор -->
+              <div class="w-[90px] shrink-0 flex flex-col items-center justify-between py-1.5 px-1 bg-inherit">
+                <div id="plateRegion" class="gost-char gost-region mt-0.5">77</div>
+                <div class="flex items-center gap-1.5 pb-0.5">
+                  <span class="font-black text-[13px] leading-none text-current tracking-tight font-sans">RUS</span>
+                  <div class="w-[22px] h-[14px] border-[1.2px] border-black/80 flex flex-col rounded-[1px] overflow-hidden shadow-sm">
+                    <div class="h-1/3 bg-white"></div>
+                    <div class="h-1/3 bg-[#0039A6]"></div>
+                    <div class="h-1/3 bg-[#D52B1E]"></div>
+                  </div>
+                </div>
+              </div>
 
-      <!-- ГОРЯЧАЯ ВОДА (ГВС) -->
-      <div class="meter-card">
-        <div class="meter-header">
-          <span class="meter-title hot">ГВС №98489</span>
-          <div class="info-btn" onclick="openMeterInfoModal('hot')">
-            <i data-lucide="info" style="width: 16px; height: 16px;"></i>
+            </div>
           </div>
         </div>
 
-        <div class="meter-values-row">
-          <div>
-            <div style="font-size: 11px; color: #94a3b8; margin-bottom: 6px;">Текущие показания</div>
-            <div class="meter-digits-box" id="hotDigitsContainer"></div>
+        <!-- Описание, регион и активные множители (ОБНОВЛЯЮТСЯ КАЖДЫЙ ПРОКРУТ) -->
+        <div class="mt-2 text-center bg-transparent rounded-2xl p-2 relative z-10">
+          <div id="regionSubtext" class="text-xs text-[#8e8e93] font-semibold tracking-wide">Регион 77 · Москва</div>
+          
+          <!-- Динамический список совпадений и множителей -->
+          <div id="modifiersList" class="mt-2 space-y-1 text-xs">
+            <!-- Генерируется при каждом прокруте -->
           </div>
-          <div class="consumption-box">
-            <div class="consumption-label">Расход</div>
-            <div class="consumption-value" id="hotConsumptionDisplay">015</div>
+
+          <!-- Кнопки: «В гараж» и Поделиться -->
+          <div class="mt-3 flex items-center justify-center gap-2 pt-2">
+            <button id="btnSaveToGarage" onclick="saveCurrentToGarage()" class="flex-1 py-2.5 rounded-2xl bg-[#1c1c1e] hover:bg-[#2c2c2e] border border-[#2c2c2e] text-xs font-black text-white active:scale-95 transition shadow-sm flex items-center justify-center gap-1.5">
+              <i data-lucide="warehouse" class="w-4 h-4 text-[#22c55e]"></i>
+              <span id="btnSaveToGarageText">В гараж</span>
+            </button>
+
+            <div id="garageSavedBadge" class="hidden flex-1 py-2.5 rounded-2xl bg-[#22c55e]/15 border border-[#22c55e]/30 text-[#22c55e] text-xs font-black flex items-center justify-center gap-1.5">
+              <i data-lucide="check" class="w-4 h-4"></i>
+              <span>Сохранён в гараже</span>
+            </div>
+
+            <button onclick="shareCurrentPlate()" class="w-11 h-10 rounded-2xl bg-[#1c1c1e] hover:bg-[#2c2c2e] border border-[#2c2c2e] text-gray-300 flex items-center justify-center active:scale-95 transition" title="Поделиться">
+              <i data-lucide="share-2" class="w-4 h-4"></i>
+            </button>
           </div>
-        </div>
 
-        <!-- Адаптивный блок ввода с клавиатуры -->
-        <div class="manual-meter-input-row">
-          <label>Ввести показание вручную:</label>
-          <div class="manual-meter-input-controls">
-            <input type="number" id="manualInputHot" class="manual-meter-input" value="98" oninput="handleManualMeterInput('hot', this.value)">
-            <span style="font-size: 12px; color: #64748b; font-weight: 600;">м³</span>
-          </div>
-        </div>
-
-        <div class="step-buttons-row">
-          <button class="step-btn" onclick="adjustMeterVal('hot', -1)">-1 м³</button>
-          <button class="step-btn" onclick="adjustMeterVal('hot', +1)">+1 м³</button>
-        </div>
-
-        <div class="anomaly-badge" id="hotAnomalyBadge">
-          ⚠️ Расход превышает средний в 3 раза! Проверьте данные.
-        </div>
-      </div>
-
-      <button class="action-btn-main" onclick="submitMeters()">
-        Передать показания
-      </button>
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- 4. ЭКРАН: ОПЛАТА С ПЛАТЕЖНЫМИ СИСТЕМАМИ     -->
-    <!-- ========================================== -->
-    <div id="screen-pay" class="screen">
-      <div class="app-header">
-        <button class="header-back-btn" onclick="goToScreen('screen-home')">
-          <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
-        </button>
-        <h1>Оплата</h1>
-      </div>
-
-      <div class="form-group-card">
-        <div style="font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-          <i data-lucide="droplets" style="width: 17px; height: 17px; color: #0284c7;"></i>
-          Показания к оплате
-        </div>
-        <div class="field-row-2">
-          <div>
-            <label class="field-label" style="color: #0284c7;">Холодная (ХВС), м³</label>
-            <input type="number" id="payInputCold" class="field-input" value="134" oninput="syncFromPaymentInputs()">
-          </div>
-          <div>
-            <label class="field-label" style="color: #e11d48;">Горячая (ГВС), м³</label>
-            <input type="number" id="payInputHot" class="field-input" value="98" oninput="syncFromPaymentInputs()">
-          </div>
-        </div>
-      </div>
-
-      <!-- Выбор способов: СБП, СберПэй, Т-Пэй -->
-      <div class="form-group-card">
-        <div style="font-size: 13px; font-weight: 700; margin-bottom: 10px;">Способ оплаты</div>
-        <div class="payment-method-selector">
-          <div class="pay-method-pill active" id="pay-method-sbp" onclick="selectPayMethod('sbp')">
-            СБП
-          </div>
-          <div class="pay-method-pill" id="pay-method-sber" onclick="selectPayMethod('sber')">
-            СберПэй
-          </div>
-          <div class="pay-method-pill" id="pay-method-tpay" onclick="selectPayMethod('tpay')">
-            Т-Пэй
+          <!-- Уведомление об авто-продаже номера -->
+          <div class="text-center mt-2 text-[11px] text-[#8e8e93]" id="autoSellNoteContainer">
+            <span id="autoSellNotice">Этот номер продастся за <span id="sellPriceNote" class="font-bold text-gray-200 font-mono">2 763 ₽</span> при следующем крутке</span>
           </div>
         </div>
 
-        <div style="display: flex; gap: 8px; margin-top: 10px;">
-          <button style="flex: 1; padding: 9px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;" onclick="downloadReceiptPDF()">
-            <i data-lucide="file-text" style="width: 13px; height: 13px;"></i>
-            Квитанция (PDF)
+      </main>
+
+      <!-- НИЖНЯЯ ПАНЕЛЬ СТАВОК И КРУТКИ -->
+      <div class="px-4 pb-2 pt-1 flex flex-col gap-2 z-20 bg-[#000000]">
+        <section class="flex items-center gap-2">
+          <button onclick="openModal('countryModal')" class="flex-1 py-2.5 px-3 rounded-2xl bg-[#1c1c1e] border border-[#2c2c2e] flex items-center justify-between text-xs font-bold text-white active:scale-95 transition">
+            <div class="flex items-center gap-1.5 truncate">
+              <span id="selectedCountryFlag">🇷🇺</span>
+              <span id="selectedCountryText" class="truncate">Россия · 77</span>
+            </div>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-[#8e8e93] shrink-0 ml-1"></i>
           </button>
-          <button style="flex: 1; padding: 9px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;" onclick="sendReceiptToBot()">
-            <i data-lucide="send" style="width: 13px; height: 13px;"></i>
-            Чек в Telegram
+
+          <button onclick="openModal('betModal')" class="flex-1 py-2.5 px-3 rounded-2xl bg-[#1c1c1e] border border-[#2c2c2e] flex items-center justify-between text-xs font-bold text-white active:scale-95 transition">
+            <div class="truncate">
+              <span id="selectedBetText">Ставка ×1</span>
+            </div>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-[#8e8e93] shrink-0 ml-1"></i>
           </button>
-        </div>
-      </div>
 
-      <div class="form-group-card">
-        <div class="bill-field">
-          <div class="bill-field-lbl">№ лицевого счета</div>
-          <div class="bill-field-val">472 383 813</div>
-        </div>
-        <div class="bill-field">
-          <div class="bill-field-lbl">Лицо по договору</div>
-          <div class="bill-field-val" id="payPersonName">Иванов Иван Иванович</div>
-        </div>
-        <div class="bill-field">
-          <div class="bill-field-lbl">Адрес объекта</div>
-          <div class="bill-field-val" id="payAddressDetail">ул. Добрякова, д. 1, кв. 1 (Этаж: 3)</div>
-        </div>
-        <div class="bill-field">
-          <div class="bill-field-lbl">Кадастровый номер</div>
-          <div class="bill-field-val" id="payCadastralDetail">77:01:0001001:1024</div>
-        </div>
-      </div>
+          <button id="btnToggleSpinMode" onclick="toggleSpinMode()" class="w-14 py-2.5 rounded-2xl bg-[#1c1c1e] border border-[#2c2c2e] text-xs font-black text-[#22c55e] active:scale-95 transition flex items-center justify-center">
+            5×
+          </button>
+        </section>
 
-      <button class="action-btn-main" id="paySubmitBtn" onclick="processPayment()">
-        Оплатить через СБП: 1 250 ₽
-      </button>
+        <!-- Главная кнопка КРУТИТЬ (Яркий неоновый зелёный) -->
+        <button id="btnSpin" onclick="spin()" class="w-full py-4 rounded-2xl bg-[#22c55e] hover:bg-[#16a34a] active:scale-[0.98] transition-all duration-150 text-black font-black text-base tracking-wide flex items-center justify-center gap-2 shadow-[0_4px_25px_rgba(34,197,94,0.4)]">
+          <span id="spinButtonText">Крутить ещё ×5</span>
+          <span id="spinButtonPrice" class="bg-black/20 px-2.5 py-1 rounded-lg text-sm font-mono text-black font-black">5 000 ₽</span>
+        </button>
+      </div>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- 5. ЭКРАН: ПРОФИЛЬ                          -->
-    <!-- ========================================== -->
-    <div id="screen-history" class="screen">
-      <div class="app-header">
-        <button class="header-back-btn" onclick="goToScreen('screen-home')">
-          <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
-        </button>
-        <h1>Абонентский номер</h1>
-        <button class="header-more-btn">•••</button>
-      </div>
-
-      <!-- Горизонтальный таббар Профиля -->
-      <div class="history-tabs-container">
-        <div class="history-tabs">
-          <div class="tab-item" id="tab-btn-benefits" onclick="switchProfileTab('benefits')">Льготы</div>
-          <div class="tab-item" id="tab-btn-requests" onclick="switchProfileTab('requests')">Заявки</div>
-          <div class="tab-item active" id="tab-btn-history" onclick="switchProfileTab('history')">История показаний</div>
+    <!-- РАЗДЕЛ 2: МАШИНЫ (КОНТЕЙНЕРЫ СО СКРИНШОТОВ) -->
+    <div id="sectionCarsView" class="hidden flex-1 px-4 py-3 overflow-y-auto no-scrollbar flex flex-col justify-between">
+      <div class="space-y-3">
+        <div class="text-center mb-1">
+          <h2 class="text-lg font-black text-white">Контейнеры с машинами</h2>
+          <p class="text-[11px] text-[#8e8e93]">Открывайте кейсы и выбивайте авто от ВАЗ-2107 до Lamborghini Urus</p>
         </div>
-      </div>
 
-      <!-- Вкладка: ЛЬГОТЫ -->
-      <div id="tab-content-benefits" class="tab-content">
-        <div class="pensioner-benefit-card">
-          <div class="benefit-header-row">
-            <div class="benefit-icon-box">🛡️</div>
+        <!-- Сетка 2x2: Обычный, Редкий, Эпический, Легендарный -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <!-- Обычный контейнер -->
+          <div onclick="openContainerInfoModal('common_case')" class="bg-gradient-to-b from-[#252528] to-[#161618] border border-[#2c2c2e] rounded-3xl p-3.5 flex flex-col items-center text-center cursor-pointer active:scale-95 transition relative overflow-hidden shadow-lg group">
+            <div class="absolute -top-12 -left-12 w-28 h-28 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+            <div class="w-16 h-16 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <svg viewBox="0 0 100 100" class="w-14 h-14 drop-shadow-md">
+                <path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#9ca3af"/>
+                <path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#6b7280"/>
+                <path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#4b5563"/>
+                <path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#d1d5db" opacity="0.8"/>
+              </svg>
+            </div>
+            <div class="text-xs font-black text-white leading-tight">Обычный контейнер</div>
+            <div class="text-sm font-black text-white font-mono mt-1">10 000 ₽</div>
+            <div class="text-[10px] text-[#8e8e93] font-semibold mt-0.5">легендарка+ 0,40%</div>
+          </div>
+
+          <!-- Редкий контейнер -->
+          <div onclick="openContainerInfoModal('rare_case')" class="bg-gradient-to-b from-[#17253b] to-[#121b29] border border-[#0a84ff]/30 rounded-3xl p-3.5 flex flex-col items-center text-center cursor-pointer active:scale-95 transition relative overflow-hidden shadow-lg group">
+            <div class="absolute -top-12 -right-12 w-28 h-28 bg-[#0a84ff]/15 rounded-full blur-xl pointer-events-none"></div>
+            <div class="w-16 h-16 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <svg viewBox="0 0 100 100" class="w-14 h-14 drop-shadow-md">
+                <path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#60a5fa"/>
+                <path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#2563eb"/>
+                <path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#1d4ed8"/>
+                <path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#bfdbfe" opacity="0.9"/>
+              </svg>
+            </div>
+            <div class="text-xs font-black text-white leading-tight">Редкий контейнер</div>
+            <div class="text-sm font-black text-[#0a84ff] font-mono mt-1">30 000 ₽</div>
+            <div class="text-[10px] text-[#8e8e93] font-semibold mt-0.5">легендарка+ 2%</div>
+          </div>
+
+          <!-- Эпический контейнер -->
+          <div onclick="openContainerInfoModal('epic_case')" class="bg-gradient-to-b from-[#2b1b36] to-[#1a1222] border border-[#bf5af2]/30 rounded-3xl p-3.5 flex flex-col items-center text-center cursor-pointer active:scale-95 transition relative overflow-hidden shadow-lg group">
+            <div class="absolute -top-12 -left-12 w-28 h-28 bg-[#bf5af2]/15 rounded-full blur-xl pointer-events-none"></div>
+            <div class="w-16 h-16 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <svg viewBox="0 0 100 100" class="w-14 h-14 drop-shadow-md">
+                <path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#c084fc"/>
+                <path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#9333ea"/>
+                <path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#7e22ce"/>
+                <path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#e9d5ff" opacity="0.9"/>
+              </svg>
+            </div>
+            <div class="text-xs font-black text-white leading-tight">Эпический контейнер</div>
+            <div class="text-sm font-black text-[#bf5af2] font-mono mt-1">100 000 ₽</div>
+            <div class="text-[10px] text-[#8e8e93] font-semibold mt-0.5">легендарка+ 12%</div>
+          </div>
+
+          <!-- Легендарный контейнер -->
+          <div onclick="openContainerInfoModal('legendary_case')" class="bg-gradient-to-b from-[#332b14] to-[#1c180d] border border-[#ffd60a]/30 rounded-3xl p-3.5 flex flex-col items-center text-center cursor-pointer active:scale-95 transition relative overflow-hidden shadow-lg group">
+            <div class="absolute -top-12 -right-12 w-28 h-28 bg-[#ffd60a]/15 rounded-full blur-xl pointer-events-none"></div>
+            <div class="w-16 h-16 flex items-center justify-center mb-2 group-hover:scale-105 transition">
+              <svg viewBox="0 0 100 100" class="w-14 h-14 drop-shadow-md">
+                <path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#fde047"/>
+                <path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#eab308"/>
+                <path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#ca8a04"/>
+                <path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#fef08a" opacity="0.9"/>
+              </svg>
+            </div>
+            <div class="text-xs font-black text-white leading-tight">Легендарный контейнер</div>
+            <div class="text-sm font-black text-[#ffd60a] font-mono mt-1">300 000 ₽</div>
+            <div class="text-[10px] text-[#8e8e93] font-semibold mt-0.5">легендарка+ 40%</div>
+          </div>
+        </div>
+
+        <!-- Широкая плашка: Элитный контейнер -->
+        <div onclick="openContainerInfoModal('elite_case')" class="bg-gradient-to-r from-[#242013] via-[#1a1711] to-[#242013] border border-[#eab308]/40 rounded-3xl p-4 flex items-center justify-between cursor-pointer active:scale-95 transition shadow-xl relative overflow-hidden group">
+          <div class="flex items-center gap-3.5">
+            <div class="w-14 h-14 shrink-0 flex items-center justify-center group-hover:scale-105 transition">
+              <svg viewBox="0 0 100 100" class="w-14 h-14 drop-shadow-lg">
+                <path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#374151"/>
+                <path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#1f2937"/>
+                <path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#111827"/>
+                <path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#9ca3af" opacity="0.7"/>
+                <polygon points="50,42 54,52 64,52 56,58 59,68 50,62 41,68 44,58 36,52 46,52" fill="#ffd60a"/>
+              </svg>
+            </div>
             <div>
-              <div class="benefit-title">У вас пенсионерские льготы 50% ЖКУ</div>
-              <div class="benefit-badge">Льгота активна • Скидка 50%</div>
+              <div class="text-sm font-black text-white">Элитный контейнер</div>
+              <div class="text-[11px] text-[#8e8e93] font-medium">эпическая и лучше · легендарка+ 65%</div>
+              <div class="text-base font-black text-[#f59e0b] font-mono mt-0.5">500 000 ₽</div>
             </div>
           </div>
-          <div class="benefit-body">
-            Скидка 50% автоматически применяется при расчете начислений за холодное и горячее водоснабжение, а также водоотведение.
-          </div>
-        </div>
-
-        <div class="form-group-card">
-          <div class="bill-field">
-            <div class="bill-field-lbl">Категория</div>
-            <div class="bill-field-val">Пенсионер по старости</div>
-          </div>
-          <div class="bill-field">
-            <div class="bill-field-lbl">Размер скидки</div>
-            <div class="bill-field-val">50% на услуги водоснабжения и ЖКУ</div>
-          </div>
-          <div class="bill-field">
-            <div class="bill-field-lbl">Статус</div>
-            <div class="bill-field-val" style="color: #059669;">Действует бессрочно</div>
-          </div>
-          <div class="bill-field">
-            <div class="bill-field-lbl">Основание</div>
-            <div class="bill-field-val">Закон г. Москвы № 70</div>
-          </div>
-          <div class="bill-field">
-            <div class="bill-field-lbl">Лицевой счёт</div>
-            <div class="bill-field-val" id="benefitAccountDisplay">472 383 813</div>
-          </div>
+          <i data-lucide="chevron-right" class="w-5 h-5 text-[#8e8e93]"></i>
         </div>
       </div>
 
-      <!-- Вкладка: ЗАЯВКИ -->
-      <div id="tab-content-requests" class="tab-content">
-        <div class="form-group-card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <div style="font-size: 13px; font-weight: 700;">Заявка № 84920</div>
-            <span style="background: #e0f2fe; color: #0284c7; padding: 2px 7px; border-radius: 6px; font-size: 10px; font-weight: 600;">В обработке</span>
-          </div>
-          <div style="font-size: 12px; color: #475569; margin-bottom: 4px;">Прямой договор водоснабжения</div>
-          <div style="font-size: 11px; color: #94a3b8;">Подана: 15.09.2023 • Срок ответа до 5 рабочих дней</div>
-        </div>
-
-        <button class="master-order-btn" onclick="openMasterModal()">
-          <i data-lucide="wrench" style="width: 16px; height: 16px;"></i>
-          Записаться на выезд мастера
-        </button>
-      </div>
-
-      <!-- Вкладка: ИСТОРИЯ ПОКАЗАНИЙ -->
-      <div id="tab-content-history" class="tab-content active">
-        <div class="chart-box">
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 10px;">
-            <i data-lucide="chevron-left" style="width: 15px; height: 15px; cursor: pointer;"></i>
-            <span>2026 год (Динамика)</span>
-            <i data-lucide="chevron-right" style="width: 15px; height: 15px; cursor: pointer;"></i>
-          </div>
-
-          <div class="bars-container">
-            <div class="bar-group">
-              <div class="bar-pair">
-                <div class="bar-cold" style="height: 38px;"></div>
-                <div class="bar-hot" style="height: 24px;"></div>
-              </div>
-              <div class="bar-label">Июль</div>
-            </div>
-
-            <div class="bar-group">
-              <div class="bar-pair">
-                <div class="bar-cold" style="height: 34px;"></div>
-                <div class="bar-hot" style="height: 20px;"></div>
-              </div>
-              <div class="bar-label">Авг</div>
-            </div>
-
-            <div class="bar-group">
-              <div class="bar-pair">
-                <div class="bar-cold" style="height: 48px;"></div>
-                <div class="bar-hot" style="height: 30px;"></div>
-              </div>
-              <div class="bar-label">Сент</div>
-            </div>
-
-            <div class="bar-group">
-              <div class="bar-pair">
-                <div class="bar-cold" id="chartBarColdLive" style="height: 52px; background: #0284c7;"></div>
-                <div class="bar-hot" id="chartBarHotLive" style="height: 45px; background: #e11d48;"></div>
-              </div>
-              <div class="bar-label" style="font-weight: 700; color: #0284c7;">Окт (Вы)</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="history-list">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 12px; font-weight: 700; color: #0284c7;">Текущий период (Октябрь 2026)</span>
-            <span style="font-size: 10px; background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-weight: 600;">Онлайн</span>
-          </div>
-          <div class="history-item">
-            <span>ХВС № 98489</span>
-            <b id="historyLiveCold">00134 м³</b>
-          </div>
-          <div class="history-item">
-            <span>ГВС № 98489</span>
-            <b id="historyLiveHot">00098 м³</b>
-          </div>
-
-          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 12px 0 6px;">24.09.2026</div>
-          <div class="history-item"><span>ХВС № 98489</span><b>00116 м³</b></div>
-          <div class="history-item"><span>ГВС № 98489</span><b>00083 м³</b></div>
-
-          <div style="font-size: 12px; font-weight: 700; color: #475569; margin: 12px 0 6px;">24.08.2026</div>
-          <div class="history-item"><span>ХВС № 98489</span><b>00098 м³</b></div>
-          <div class="history-item"><span>ГВС № 98489</span><b>00070 м³</b></div>
-        </div>
+      <div class="mt-4 p-3 rounded-2xl bg-[#1c1c1e] border border-[#2c2c2e] text-center">
+        <span class="text-xs text-[#8e8e93]">Выбитые автомобили сохраняются в <span onclick="openGarageModal()" class="text-[#22c55e] font-bold cursor-pointer underline">Гараж</span> и могут быть проданы!</span>
       </div>
     </div>
 
-
-    <!-- ========================================== -->
-    <!-- 6. ЭКРАН: БОТ МОСВОДОКАНАЛ                -->
-    <!-- ========================================== -->
-    <div id="screen-bot" class="screen">
-      <div class="bot-screen-container">
-        <div class="app-header" style="background: transparent; color: #fff;">
-          <button class="header-back-btn" style="color: #fff;" onclick="goToScreen('screen-home')">
-            <i data-lucide="chevron-left" style="width: 24px; height: 24px;"></i>
-          </button>
-          <h1 style="color: #fff;">Бот мосводоканал</h1>
-        </div>
-
-        <div class="bot-chat-area" id="botChatArea">
-          <div class="msg-bubble msg-incoming">
-            Здравствуйте! Чем могу помочь?
-            <div class="msg-time">23:43</div>
-          </div>
-          <div class="msg-bubble msg-outgoing">
-            Как оплатить счета?
-            <div class="msg-time">23:43</div>
-          </div>
-          <div class="msg-bubble msg-incoming">
-            Выберите удобный способ оплаты (СБП, СберПэй или Т-Пэй) и совершите оплату в один клик.
-            <div style="background: rgba(2, 132, 199, 0.1); border: 1px solid #0284c7; color: #0284c7; padding: 8px 12px; border-radius: 10px; font-weight: 600; margin-top: 8px; width: fit-content; cursor: pointer;" onclick="goToScreen('screen-pay')">
-              Перейти к оплате
-            </div>
-            <div class="msg-time">23:44</div>
-          </div>
-        </div>
-
-        <div class="bot-input-bar">
-          <input type="text" id="botMsgInput" class="bot-input" placeholder="Напишите вопрос боту...">
-          <button class="bot-send-btn" onclick="sendBotMessage()">
-            <i data-lucide="send" style="width: 17px; height: 17px;"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- МОДАЛЬНЫЕ ОКНА С КРЕСТИКОМ (✕)             -->
-    <!-- ========================================== -->
-
-    <!-- Модалка: Отключение воды 25 октября 2026 -->
-    <div id="outageModal" class="modal-overlay">
-      <div class="modal-card">
-        <button class="modal-close-x" onclick="closeOutageModal()">
-          <i data-lucide="x" style="width: 17px; height: 17px;"></i>
-        </button>
-        <div class="modal-icon warning">
-          <i data-lucide="droplet-off" style="width: 28px; height: 28px;"></i>
-        </div>
-        <div class="modal-title">Отключение воды</div>
-        <div class="modal-text">
-          <b>25 октября 2026 года с 09:00 до 20:00</b><br>
-          по адресу <span id="modalOutageAddress">ул. Добрякова, д. 1</span> будут проводиться гидравлические испытания трубопроводов.<br><br>
-          Пожалуйста, сделайте необходимый запас питьевой воды.
-        </div>
-        <button class="modal-btn" onclick="closeOutageModal()">Понятно, спасибо</button>
-      </div>
-    </div>
-
-    <!-- Модалка: Инфо о последней отправке (ℹ️) -->
-    <div id="meterInfoModal" class="modal-overlay">
-      <div class="modal-card">
-        <button class="modal-close-x" onclick="closeMeterInfoModal()">
-          <i data-lucide="x" style="width: 17px; height: 17px;"></i>
-        </button>
-        <div class="modal-icon info">
-          <i data-lucide="calendar-check" style="width: 28px; height: 28px;"></i>
-        </div>
-        <div class="modal-title" id="infoMeterTitle">ХВС №98489</div>
-        <div class="modal-text">
-          <div style="margin-bottom: 8px;">
-            <b>Дата отправки показаний:</b><br>
-            <span id="infoMeterDate" style="color: #0284c7; font-size: 13px; font-weight: 600;">24 сентября 2026 г., 14:32:10</span>
-          </div>
-          <div style="margin-bottom: 8px;">
-            <b>Переданное значение:</b> <span id="infoMeterValue">00134 м³</span>
-          </div>
-          <div style="margin-bottom: 8px;">
-            <b>Расход за период:</b> <span id="infoMeterDiff">18 м³</span>
-          </div>
-          <div>
-            <b>Статус в биллинге:</b> <span style="color: #10b981; font-weight: 600;">Принято к расчету</span>
-          </div>
-        </div>
-        <button class="modal-btn" onclick="closeMeterInfoModal()">Закрыть</button>
-      </div>
-    </div>
-
-    <!-- Модалка: Вызов мастера с крестиком закрытия -->
-    <div id="masterModal" class="modal-overlay">
-      <div class="modal-card">
-        <button class="modal-close-x" onclick="closeMasterModal()">
-          <i data-lucide="x" style="width: 17px; height: 17px;"></i>
-        </button>
-        <div class="modal-icon info">
-          <i data-lucide="calendar" style="width: 28px; height: 28px;"></i>
-        </div>
-        <div class="modal-title">Вызов мастера</div>
-        <div class="modal-text">
-          <label class="field-label">Выберите дату визита</label>
-          <input type="date" id="masterDate" class="field-input" value="2026-10-20" style="margin-bottom: 10px;">
-          
-          <label class="field-label">Интервал времени</label>
-          <select id="masterSlot" class="field-input">
-            <option>09:00 - 13:00 (Утро)</option>
-            <option>13:00 - 17:00 (День)</option>
-            <option>17:00 - 20:00 (Вечер)</option>
-          </select>
-        </div>
-        <button class="modal-btn" onclick="submitMasterBooking()">Записаться</button>
-      </div>
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- НИЖНЯЯ ПАНЕЛЬ С ВЕКТОРНЫМ ЛОГОТИПОМ        -->
-    <!-- ========================================== -->
-    <div class="bottom-nav">
-      <button class="nav-item active" id="nav-home" onclick="goToScreen('screen-home')">
-        <i data-lucide="home" style="width: 20px; height: 20px;"></i>
-        <span>Главная</span>
+    <!-- Нижняя навигация Telegram Mini App -->
+    <nav class="border-t border-[#1c1c1e] bg-[#000000] pt-2 pb-1 flex items-center justify-around z-20">
+      <button onclick="switchAppTab('plates')" class="flex flex-col items-center gap-0.5 active:scale-95 transition" id="navBtnPlay">
+        <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+        <span class="text-[10px] font-black">Играть</span>
       </button>
-
-      <button class="nav-item" id="nav-meters" onclick="goToScreen('screen-meters')">
-        <i data-lucide="droplet" style="width: 20px; height: 20px;"></i>
-        <span>Показания</span>
+      <button onclick="openGarageModal()" class="flex flex-col items-center gap-0.5 text-[#8e8e93] hover:text-white active:scale-95 transition">
+        <div class="relative">
+          <i data-lucide="warehouse" class="w-4 h-4"></i>
+          <span id="garageCountBadge" class="hidden absolute -top-1 -right-2 bg-[#22c55e] text-black text-[9px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">0</span>
+        </div>
+        <span class="text-[10px] font-bold">Гараж</span>
       </button>
-
-      <!-- Центральная кнопка: Векторный исторический герб Мосводоканала (башня с арками и волнами) -->
-      <div class="nav-center-bubble" onclick="goToScreen('screen-bot')" title="Бот Мосводоканал">
-        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Шпиль и шатер -->
-          <path d="M50 14L50 20M50 14L49 20M50 14L51 20" stroke="#1058ca" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M50 20L32 29L32 35L68 35L68 29L50 20Z" fill="#1058ca"/>
-          
-          <!-- Зубчатые карнизы -->
-          <circle cx="37" cy="30" r="2.5" fill="#ffffff"/>
-          <circle cx="50" cy="27" r="2.5" fill="#ffffff"/>
-          <circle cx="63" cy="30" r="2.5" fill="#ffffff"/>
-
-          <!-- Верхний ярус башни -->
-          <rect x="32.5" y="35" width="35" height="15" fill="#1058ca"/>
-          <rect x="36" y="38" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="39.5" y="38" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="43" y="38" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="49" y="38" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="52.5" y="38" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="56" y="38" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="62" y="38" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="65" y="38" width="2" height="6.5" fill="#ffffff"/>
-          
-          <!-- Разделительный карниз -->
-          <rect x="32" y="47.5" width="36" height="2" fill="#ffffff"/>
-
-          <!-- Средний ярус башни -->
-          <rect x="32.5" y="49.5" width="35" height="15" fill="#1058ca"/>
-          <rect x="36" y="52" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="39.5" y="52" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="43" y="52" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="49" y="52" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="52.5" y="52" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="56" y="52" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="62" y="52" width="2" height="6.5" fill="#ffffff"/>
-          <rect x="65" y="52" width="2" height="6.5" fill="#ffffff"/>
-
-          <!-- Нижний ярус с тремя арками -->
-          <path d="M32.5 64.5H67.5V77.5H64V68.5C64 66.5 62 65 59.5 65C57 65 55 66.5 55 68.5V77.5H52V68.5C52 66.5 50 65 47.5 65C45 65 43 66.5 43 68.5V77.5H40V68.5C40 66.5 38 65 35.5 65C33 65 32.5 66.5 32.5 68.5V77.5H32.5V64.5Z" fill="#1058ca"/>
-
-          <!-- Левые волны -->
-          <path d="M12 66.5C15 64.5 19 64.5 22 66.5C25 68.5 29 68.5 32.5 66.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
-          <path d="M12 71.5C15 69.5 19 69.5 22 71.5C25 73.5 29 73.5 32.5 71.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
-          <path d="M12 76.5C15 74.5 19 74.5 22 76.5C25 78.5 29 78.5 32.5 76.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
-
-          <!-- Правые волны -->
-          <path d="M67.5 66.5C71 64.5 75 64.5 78 66.5C81 68.5 85 68.5 88 66.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
-          <path d="M67.5 71.5C71 69.5 75 69.5 78 71.5C81 73.5 85 73.5 88 71.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
-          <path d="M67.5 76.5C71 74.5 75 74.5 78 76.5C81 78.5 85 78.5 88 76.5" stroke="#1058ca" stroke-width="3" stroke-linecap="round"/>
-        </svg>
-      </div>
-
-      <button class="nav-item" id="nav-pay" onclick="goToScreen('screen-pay')">
-        <i data-lucide="credit-card" style="width: 20px; height: 20px;"></i>
-        <span>Платежи</span>
+      <button onclick="showToast('Рынок откроется в обновлении 1.3')" class="flex flex-col items-center gap-0.5 text-[#8e8e93] hover:text-white active:scale-95 transition">
+        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+        <span class="text-[10px] font-bold">Рынок</span>
       </button>
-
-      <button class="nav-item" id="nav-history" onclick="goToScreen('screen-history')">
-        <i data-lucide="user" style="width: 20px; height: 20px;"></i>
-        <span>Профиль</span>
+      <button onclick="showToast('Реферальная программа в разработке')" class="flex flex-col items-center gap-0.5 text-[#8e8e93] hover:text-white active:scale-95 transition">
+        <i data-lucide="users" class="w-4 h-4"></i>
+        <span class="text-[10px] font-bold">Друзья</span>
       </button>
-    </div>
+      <button onclick="resetProgress()" class="flex flex-col items-center gap-0.5 text-[#8e8e93] hover:text-rose-400 active:scale-95 transition" title="Сбросить">
+        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+        <span class="text-[10px] font-bold">Сброс</span>
+      </button>
+    </nav>
 
   </div>
 
-  <script>
-    // Инициализация Telegram WebApp
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-      tg.expand();
-      try {
-        tg.setHeaderColor('#f4f7fb');
-        tg.setBackgroundColor('#f4f7fb');
-        if (tg.BackButton) {
-          tg.BackButton.onClick(() => goToScreen('screen-home'));
-        }
-      } catch (e) {}
-    }
+  <!-- МОДАЛКА 1: ДЕТАЛИ И ШАНСЫ КОНТЕЙНЕРА (СО СКРИНШОТОВ) -->
+  <div id="modalContainerInfo" class="fixed inset-0 z-50 flex flex-col justify-end hidden">
+    <div class="absolute inset-0 bg-black/85 backdrop-blur-sm" onclick="closeModal('modalContainerInfo')"></div>
+    <div class="relative w-full max-w-md mx-auto bg-[#1c1c1e] rounded-t-3xl border-t border-[#2c2c2e] p-5 flex flex-col max-h-[90vh]">
+      <div class="w-12 h-1.5 bg-[#48484a] rounded-full mx-auto mb-3"></div>
+      
+      <h2 id="containerModalTitle" class="text-xl font-black text-center text-white mb-2">Обычный контейнер</h2>
+      
+      <!-- Большая иконка контейнера -->
+      <div id="containerModalIcon" class="w-24 h-24 mx-auto my-1 flex items-center justify-center">
+        <!-- SVG вставляется скриптом -->
+      </div>
 
-    // Состояние приложения
-    const state = {
-      currentAccount: 'home',
-      accounts: {
-        home: {
-          title: 'Дом',
-          address: 'ул. Добрякова, д. 1',
-          apartment: '1',
-          floor: '3',
-          cadastral: '77:01:0001001:1024',
-          accountNumber: '472 383 813',
-          owner: 'Иванов Иван Иванович',
-          coldPrev: 116,
-          hotPrev: 83,
-          coldVal: 134,
-          hotVal: 98
-        },
-        dacha: {
-          title: 'Дача',
-          address: 'пос. Вороновское, уч. 42',
-          apartment: '—',
-          floor: '2',
-          cadastral: '50:27:0020114:512',
-          accountNumber: '109 482 911',
-          owner: 'Иванов Иван Иванович',
-          coldPrev: 45,
-          hotPrev: 20,
-          coldVal: 52,
-          hotVal: 24
-        },
-        parents: {
-          title: 'Квартира родителей',
-          address: 'ул. Ленина, д. 14',
-          apartment: '8',
-          floor: '4',
-          cadastral: '77:04:0003011:9812',
-          accountNumber: '381 920 119',
-          owner: 'Иванова Светлана Петровна',
-          coldPrev: 210,
-          hotPrev: 160,
-          coldVal: 224,
-          hotVal: 172
-        }
-      },
-      selectedPayMethod: 'sbp'
+      <!-- Список редкостей и шансов со скриншотов -->
+      <div id="containerChancesList" class="space-y-2 my-3 overflow-y-auto max-h-[46vh] no-scrollbar">
+        <!-- Генерируется скриптом -->
+      </div>
+
+      <!-- Кнопка «Открыть за X ₽» -->
+      <button id="btnOpenContainerDirect" onclick="triggerContainerOpenProcess()" class="w-full py-4 rounded-2xl bg-[#22c55e] hover:bg-[#16a34a] active:scale-[0.98] transition-all text-black font-black text-base shadow-[0_4px_25px_rgba(34,197,94,0.35)] mt-1">
+        Открыть за 10 000 ₽
+      </button>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА 2: РУЛЕТКА ОТКРЫТИЯ КЕЙСА (ГОРИЗОНТАЛЬНЫЙ CS-ПРОКРУТ) -->
+  <div id="modalCaseRoulette" class="fixed inset-0 z-50 flex flex-col items-center justify-center p-4 hidden">
+    <div class="absolute inset-0 bg-black/92 backdrop-blur-md"></div>
+    
+    <div class="relative w-full max-w-md bg-[#161618] border border-[#2c2c2e] rounded-3xl p-5 shadow-2xl flex flex-col items-center overflow-hidden">
+      <div class="text-xs uppercase tracking-widest text-[#8e8e93] font-bold mb-1" id="rouletteCaseNameHeader">ОТКРЫТИЕ КОНТЕЙНЕРА</div>
+      <div class="text-sm font-black text-white mb-4">Испытай удачу!</div>
+
+      <!-- Окно рулетки с вертикальным визиром -->
+      <div class="w-full h-32 bg-[#000000] rounded-2xl border-2 border-[#2c2c2e] relative overflow-hidden flex items-center">
+        <!-- Центральный прицел/визир -->
+        <div class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-1 bg-[#ffd60a] z-30 shadow-[0_0_12px_#ffd60a] pointer-events-none">
+          <div class="w-3 h-3 bg-[#ffd60a] rotate-45 mx-auto -mt-1.5"></div>
+          <div class="w-3 h-3 bg-[#ffd60a] rotate-45 mx-auto mt-[112px]"></div>
+        </div>
+
+        <!-- Лента карточек автомобилей -->
+        <div id="rouletteTrack" class="flex items-center gap-3 px-3 transition-transform duration-[4500ms] ease-out will-change-transform">
+          <!-- Генерируется скриптом -->
+        </div>
+      </div>
+
+      <!-- Результат после завершения прокрута -->
+      <div id="rouletteResultBox" class="mt-4 w-full flex flex-col items-center text-center hidden">
+        <div class="text-xs text-[#8e8e93] font-bold">Вам выпал автомобиль:</div>
+        <div id="resultCarName" class="text-lg font-black text-white mt-0.5">Toyota Land Cruiser 300</div>
+        <div id="resultCarRarity" class="text-xs font-black uppercase tracking-wider text-[#ffd60a] mt-0.5">Легендарный</div>
+        <div id="resultCarPrice" class="text-xl font-black text-[#22c55e] font-mono mt-1">2 850 000 ₽</div>
+
+        <div class="flex gap-2 w-full mt-4">
+          <button onclick="sellRouletteDroppedCar()" class="flex-1 py-3 rounded-2xl bg-red-600/20 border border-red-500/40 text-red-400 text-xs font-black active:scale-95 transition">
+            Продать
+          </button>
+          <button onclick="garageRouletteDroppedCar()" class="flex-1 py-3 rounded-2xl bg-[#22c55e] text-black text-xs font-black active:scale-95 transition shadow-lg">
+            В гараж
+          </button>
+        </div>
+      </div>
+
+      <div id="rouletteSpinningIndicator" class="mt-4 text-xs font-bold text-[#8e8e93] flex items-center gap-2">
+        <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-[#22c55e]"></i>
+        <span>Открываем контейнер...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА: РЕЖИМ ×5 -->
+  <div id="modalSpin5" class="fixed inset-0 z-50 flex flex-col justify-end hidden">
+    <div class="absolute inset-0 bg-black/85 backdrop-blur-sm" onclick="finishSpin5Modal()"></div>
+    <div class="relative w-full max-w-md mx-auto bg-[#1c1c1e] rounded-t-3xl border-t border-[#2c2c2e] p-5 flex flex-col max-h-[90vh]">
+      <div class="w-12 h-1.5 bg-[#48484a] rounded-full mx-auto mb-3"></div>
+      
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <h2 class="text-base font-black text-white flex items-center gap-2">
+            <span>🎉 Результаты 5× прокрутки</span>
+          </h2>
+          <div class="text-[11px] text-[#8e8e93]">Продайте ненужные или нажмите продолжить для сохранения в гараж</div>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-2.5 pr-1 my-2 no-scrollbar" id="spin5ListContainer">
+        <!-- Список номеров генерируется JS -->
+      </div>
+
+      <div class="pt-3 border-t border-[#2c2c2e] flex flex-col gap-2">
+        <div class="flex gap-2">
+          <button onclick="sellAllSpin5Remaining()" class="flex-1 py-3 rounded-2xl bg-red-600/20 border border-red-500/40 text-red-400 text-xs font-black active:scale-95 transition">
+            Продать все
+          </button>
+          <button onclick="finishSpin5Modal()" class="flex-1 py-3 rounded-2xl bg-[#22c55e] text-black text-xs font-black active:scale-95 transition shadow-lg">
+            Продолжить (в гараж)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА: СТАВКА -->
+  <div id="betModal" class="fixed inset-0 z-50 flex flex-col justify-end hidden">
+    <div class="absolute inset-0 bg-black/85 backdrop-blur-sm" onclick="closeModal('betModal')"></div>
+    <div class="relative w-full max-w-md mx-auto bg-[#1c1c1e] rounded-t-3xl border-t border-[#2c2c2e] p-5 overflow-y-auto max-h-[85vh]">
+      <div class="w-12 h-1.5 bg-[#48484a] rounded-full mx-auto mb-4"></div>
+      <h2 class="text-xl font-black text-center text-white mb-1">Ставка</h2>
+      <p class="text-xs text-[#8e8e93] text-center mb-5 px-2">
+        Дороже крутка — выше гарантированная редкость и начальная стоимость!
+      </p>
+
+      <div class="space-y-2.5" id="betOptionsContainer">
+        <!-- Генерируется JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА: ВЫБОР СТРАНЫ / ТИПА -->
+  <div id="countryModal" class="fixed inset-0 z-50 flex flex-col justify-end hidden">
+    <div class="absolute inset-0 bg-black/85 backdrop-blur-sm" onclick="closeModal('countryModal')"></div>
+    <div class="relative w-full max-w-md mx-auto bg-[#1c1c1e] rounded-t-3xl border-t border-[#2c2c2e] p-5 overflow-y-auto max-h-[85vh]">
+      <div class="w-12 h-1.5 bg-[#48484a] rounded-full mx-auto mb-3"></div>
+      <h2 class="text-xl font-black text-center text-white mb-2">Формат номеров</h2>
+      <div class="space-y-2" id="countryOptionsList">
+        <!-- Список регионов -->
+      </div>
+    </div>
+  </div>
+
+  <!-- МОДАЛКА: ГАРАЖ -->
+  <div id="garageModal" class="fixed inset-0 z-50 flex flex-col justify-end hidden">
+    <div class="absolute inset-0 bg-black/85 backdrop-blur-sm" onclick="closeModal('garageModal')"></div>
+    <div class="relative w-full max-w-md mx-auto bg-[#1c1c1e] rounded-t-3xl border-t border-[#2c2c2e] p-5 flex flex-col max-h-[85vh]">
+      <div class="w-12 h-1.5 bg-[#48484a] rounded-full mx-auto mb-3"></div>
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h2 class="text-xl font-black text-white flex items-center gap-2">
+            <i data-lucide="warehouse" class="w-5 h-5 text-[#22c55e]"></i> Гараж номеров
+          </h2>
+          <div class="text-xs text-[#8e8e93]">Сохранённые коллекции номеров</div>
+        </div>
+        <button onclick="closeModal('garageModal')" class="text-[#8e8e93] hover:text-white p-1">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-2.5 pr-1 no-scrollbar" id="garageListContainer">
+        <!-- Список сохраненных номеров -->
+      </div>
+
+      <div class="pt-3 border-t border-[#2c2c2e] mt-2">
+        <button onclick="sellAllGarage()" class="w-full py-2.5 rounded-2xl bg-red-600/20 border border-red-500/40 text-red-400 text-xs font-black active:scale-95 transition">
+          Продать все номера из гаража
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast уведомление -->
+  <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-[#1c1c1e] text-white text-xs font-bold px-4 py-2.5 rounded-2xl shadow-2xl border border-[#2c2c2e] pointer-events-none transition-all duration-300 opacity-0 -translate-y-2">
+    Уведомление
+  </div>
+
+  <script>
+    /* =========================================================
+       КОНФИГУРАЦИЯ СТАВОК И МАТЕМАТИЧЕСКАЯ МОДЕЛЬ МНОЖИТЕЛЕЙ
+       ========================================================= */
+    const ALLOWED_LETTERS = ['А', 'В', 'Е', 'К', 'М', 'Н', 'О', 'Р', 'С', 'Т', 'У', 'Х'];
+
+    // РАСШИРЕННАЯ БАЗА БЛАТНЫХ, ВЕДОМСТВЕННЫХ И КУЛЬТОВЫХ СЕРИЙ
+    const VIP_SERIES = {
+      // Правительственные и силовые структуры
+      'АМР': { name: 'Правительство РФ / Спецслужбы', mult: 2.8, desc: 'Главная спецсерия РФ' },
+      'ЕКХ': { name: 'ФСО России («Еду Как Хочу»)', mult: 3.1, desc: 'Федеральная служба охраны' },
+      'АМО': { name: 'Мэрия Москвы / Администрация', mult: 2.3, desc: 'Руководство столицы' },
+      'СКР': { name: 'Следственный комитет РФ', mult: 2.7, desc: 'Следственные органы' },
+      'ААА': { name: 'Администрация Президента РФ', mult: 2.4, desc: 'Кремлевский гараж' },
+      'ООО': { name: 'ФСБ / Госбезопасность', mult: 2.2, desc: 'Спецподразделения госбезопасности' },
+      'ВМР': { name: 'Военное ведомство / Минобороны', mult: 2.1, desc: 'Центральный аппарат МО' },
+      'СМР': { name: 'Совет Федерации / Сенаторы', mult: 2.3, desc: 'Сенаторская серия' },
+      'ММР': { name: 'МВД России (Центральный аппарат)', mult: 2.2, desc: 'Министерство внутренних дел' },
+      'МММ': { name: 'ГУВД Москвы / Силовики', mult: 2.4, desc: 'Культовая московская серия' },
+      'РМР': { name: 'Минюст / Прокуратура', mult: 2.0, desc: 'Органы юстиции и надзора' },
+      'АКР': { name: 'Контрольно-ревизионные органы', mult: 2.0, desc: 'Аудит и надзор' },
+      'ЕРЕ': { name: 'Госдума («Единая Россия»)', mult: 1.9, desc: 'Депутатский корпус' },
+
+      // Культовые, уличные и статусные серии
+      'ВОР': { name: 'Культовая серия «ВОР»', mult: 2.6, desc: 'Высший криминальный спрос' },
+      'ХХХ': { name: 'Серия «Три Икса»', mult: 2.8, desc: 'Агрессивный броский стиль' },
+      'ССС': { name: 'Серия «Три Сестры» / Спецсвязь', mult: 2.5, desc: 'Исторический вес спецсвязи' },
+      'ХАМ': { name: 'Дерзкая серия «ХАМ»', mult: 2.2, desc: 'Уличный статус' },
+      'БАН': { name: 'Серия «БАН»', mult: 1.8, desc: 'Эксклюзивная авто-эстетика' },
+      'ТОП': { name: 'Серия «ТОП»', mult: 2.1, desc: 'Элитный подчеркнутый стиль' },
+      'ЗЛО': { name: 'Серия «ЗЛО»', mult: 2.2, desc: 'Эпатаж и узнаваемость' },
+      'СВО': { name: 'Специальная Военная Операция', mult: 2.3, desc: 'Историческая ценность' },
+      'ВСУ': { name: 'Мугуч попросил', mult: 2.0, desc: 'Вооружённые силы Армении' }
     };
 
-    function triggerHaptic(type = 'light') {
-      if (tg && tg.HapticFeedback) {
-        if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
-        else tg.HapticFeedback.impactOccurred(type);
+    // ШКАЛА РЕДКОСТЕЙ: ДОБАВЛЕНЫ МИФИЧЕСКИЙ (5) И СЕКРЕТНЫЙ (6)
+    const RARITY_INFO = [
+      { name: 'Обычный', color: '#8e8e93', glow: 'glow-rarity-0', bars: 1, xp: 2, minPrice: 80, maxPrice: 900 },
+      { name: 'Необычный', color: '#22c55e', glow: 'glow-rarity-1', bars: 3, xp: 8, minPrice: 1500, maxPrice: 12000 },
+      { name: 'Редкий', color: '#0a84ff', glow: 'glow-rarity-2', bars: 5, xp: 30, minPrice: 20000, maxPrice: 75000 },
+      { name: 'Эпический', color: '#bf5af2', glow: 'glow-rarity-3', bars: 7, xp: 110, minPrice: 90000, maxPrice: 320000 },
+      { name: 'Легендарный', color: '#ffd60a', glow: 'glow-rarity-4', bars: 9, xp: 350, minPrice: 420000, maxPrice: 1350000 },
+      { name: 'Мифический', color: '#ef4444', glow: 'glow-rarity-5', bars: 10, xp: 950, minPrice: 1600000, maxPrice: 2700000 },
+      { name: 'Секретный', color: '#ec4899', glow: 'glow-rarity-6', bars: 10, xp: 2800, minPrice: 3200000, maxPrice: 5000000 }
+    ];
+
+    /* =========================================================
+       БАЗА АВТОМОБИЛЕЙ И КОНТЕЙНЕРОВ (СО СКРИНШОТОВ)
+       ========================================================= */
+    const CAR_RARITIES = {
+      common: { name: 'Обычный', color: '#8e8e93', border: 'border-l-4 border-l-[#8e8e93]', bg: 'bg-[#8e8e93]/10' },
+      uncommon: { name: 'Необычный', color: '#22c55e', border: 'border-l-4 border-l-[#22c55e]', bg: 'bg-[#22c55e]/10' },
+      rare: { name: 'Редкий', color: '#0a84ff', border: 'border-l-4 border-l-[#0a84ff]', bg: 'bg-[#0a84ff]/10' },
+      epic: { name: 'Эпический', color: '#bf5af2', border: 'border-l-4 border-l-[#bf5af2]', bg: 'bg-[#bf5af2]/10' },
+      legendary: { name: 'Легендарный', color: '#ffd60a', border: 'border-l-4 border-l-[#ffd60a]', bg: 'bg-[#ffd60a]/10' },
+      mythic: { name: 'Мифический', color: '#ef4444', border: 'border-l-4 border-l-[#ef4444]', bg: 'bg-[#ef4444]/10' }
+    };
+
+    /* СБАЛАНСИРОВАННЫЕ ЦЕНЫ ДРОПА АВТОМОБИЛЕЙ (РЕАЛИСТИЧНАЯ ЭКОНОМИКА КЕЙСОВ) */
+    const CAR_POOL = {
+      common: [
+        { name: 'ВАЗ-2107', minPrice: 1800, maxPrice: 3200 },
+        { name: 'ВАЗ-2109', minPrice: 2200, maxPrice: 3800 },
+        { name: 'Daewoo Nexia', minPrice: 2600, maxPrice: 4400 },
+        { name: 'Lada Granta', minPrice: 3200, maxPrice: 5200 }
+      ],
+      uncommon: [
+        { name: 'Лада Веста', minPrice: 6500, maxPrice: 9500 },
+        { name: 'Kia Rio', minPrice: 7500, maxPrice: 11000 },
+        { name: 'Hyundai Solaris', minPrice: 8000, maxPrice: 12000 },
+        { name: 'Skoda Rapid', minPrice: 8500, maxPrice: 13500 }
+      ],
+      rare: [
+        { name: 'УАЗ Патриот', minPrice: 18000, maxPrice: 26000 },
+        { name: 'Hyundai Sonata', minPrice: 22000, maxPrice: 32000 },
+        { name: 'Volkswagen Passat', minPrice: 25000, maxPrice: 38000 },
+        { name: 'Toyota Camry 70', minPrice: 28000, maxPrice: 45000 }
+      ],
+      epic: [
+        { name: 'Toyota Land Cruiser Prado', minPrice: 60000, maxPrice: 95000 },
+        { name: 'Audi A6 Allroad', minPrice: 70000, maxPrice: 115000 },
+        { name: 'BMW 5 Series', minPrice: 80000, maxPrice: 135000 },
+        { name: 'Mercedes-Benz E-Class', minPrice: 90000, maxPrice: 150000 }
+      ],
+      legendary: [
+        { name: 'Toyota Land Cruiser 300', minPrice: 200000, maxPrice: 320000 },
+        { name: 'Range Rover Vogue', minPrice: 240000, maxPrice: 380000 },
+        { name: 'Porsche Cayenne GTS', minPrice: 280000, maxPrice: 420000 },
+        { name: 'Mercedes-Benz G63 AMG', minPrice: 320000, maxPrice: 480000 }
+      ],
+      mythic: [
+        { name: 'Lamborghini Urus', minPrice: 750000, maxPrice: 1100000 },
+        { name: 'Mercedes-Maybach S-Class', minPrice: 850000, maxPrice: 1300000 },
+        { name: 'Rolls-Royce Cullinan', minPrice: 1100000, maxPrice: 1600000 },
+        { name: 'Ferrari SF90 Stradale', minPrice: 1300000, maxPrice: 1950000 }
+      ]
+    };
+
+    // Точные шансы и конфигурация со скриншотов
+    const CONTAINERS_CONFIG = {
+      common_case: {
+        id: 'common_case',
+        name: 'Обычный контейнер',
+        cost: 10000,
+        subtext: 'легендарка+ 0,40%',
+        color: '#9ca3af',
+        iconSvg: `<svg viewBox="0 0 100 100" class="w-20 h-20 drop-shadow-xl"><path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#9ca3af"/><path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#6b7280"/><path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#4b5563"/><path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#d1d5db" opacity="0.8"/></svg>`,
+        chances: [
+          { rarity: 'common', pct: '70%', num: 70 },
+          { rarity: 'uncommon', pct: '22%', num: 22 },
+          { rarity: 'rare', pct: '6%', num: 6 },
+          { rarity: 'epic', pct: '1.6%', num: 1.6 },
+          { rarity: 'legendary', pct: '0,35%', num: 0.35 },
+          { rarity: 'mythic', pct: '0,05%', num: 0.05 }
+        ]
+      },
+      rare_case: {
+        id: 'rare_case',
+        name: 'Редкий контейнер',
+        cost: 30000,
+        subtext: 'легендарка+ 2%',
+        color: '#0a84ff',
+        iconSvg: `<svg viewBox="0 0 100 100" class="w-20 h-20 drop-shadow-xl"><path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#60a5fa"/><path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#2563eb"/><path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#1d4ed8"/><path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#bfdbfe" opacity="0.9"/></svg>`,
+        chances: [
+          { rarity: 'common', pct: '32%', num: 32 },
+          { rarity: 'uncommon', pct: '40%', num: 40 },
+          { rarity: 'rare', pct: '19%', num: 19 },
+          { rarity: 'epic', pct: '6.5%', num: 6.5 },
+          { rarity: 'legendary', pct: '2%', num: 2.0 },
+          { rarity: 'mythic', pct: '0,4%', num: 0.4 }
+        ]
+      },
+      epic_case: {
+        id: 'epic_case',
+        name: 'Эпический контейнер',
+        cost: 100000,
+        subtext: 'легендарка+ 12%',
+        color: '#bf5af2',
+        iconSvg: `<svg viewBox="0 0 100 100" class="w-20 h-20 drop-shadow-xl"><path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#c084fc"/><path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#9333ea"/><path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#7e22ce"/><path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#e9d5ff" opacity="0.9"/></svg>`,
+        chances: [
+          { rarity: 'uncommon', pct: '23%', num: 23 },
+          { rarity: 'rare', pct: '40%', num: 40 },
+          { rarity: 'epic', pct: '25%', num: 25 },
+          { rarity: 'legendary', pct: '10%', num: 10 },
+          { rarity: 'mythic', pct: '2%', num: 2.0 }
+        ]
+      },
+      legendary_case: {
+        id: 'legendary_case',
+        name: 'Легендарный контейнер',
+        cost: 300000,
+        subtext: 'легендарка+ 40%',
+        color: '#ffd60a',
+        iconSvg: `<svg viewBox="0 0 100 100" class="w-20 h-20 drop-shadow-xl"><path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#fde047"/><path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#eab308"/><path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#ca8a04"/><path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#fef08a" opacity="0.9"/></svg>`,
+        chances: [
+          { rarity: 'rare', pct: '20%', num: 20 },
+          { rarity: 'epic', pct: '40%', num: 40 },
+          { rarity: 'legendary', pct: '30%', num: 30 },
+          { rarity: 'mythic', pct: '10%', num: 10 }
+        ]
+      },
+      elite_case: {
+        id: 'elite_case',
+        name: 'Элитный контейнер',
+        cost: 500000,
+        subtext: 'эпическая и лучше · легендарка+ 65%',
+        color: '#f59e0b',
+        iconSvg: `<svg viewBox="0 0 100 100" class="w-20 h-20 drop-shadow-xl"><path d="M50 15 L85 35 L50 55 L15 35 Z" fill="#374151"/><path d="M15 35 L50 55 L50 85 L15 65 Z" fill="#1f2937"/><path d="M85 35 L50 55 L50 85 L85 65 Z" fill="#111827"/><path d="M42 24 L58 33 L58 75 L42 66 Z" fill="#9ca3af" opacity="0.7"/><polygon points="50,42 54,52 64,52 56,58 59,68 50,62 41,68 44,58 36,52 46,52" fill="#ffd60a"/></svg>`,
+        chances: [
+          { rarity: 'epic', pct: '35%', num: 35 },
+          { rarity: 'legendary', pct: '45%', num: 45 },
+          { rarity: 'mythic', pct: '20%', num: 20 }
+        ]
       }
+    };
+    
+    // Полный список регионов РФ + режим «Любой регион»
+    // Столичные (Москва/МО), Питер, Екб (Свердловская обл.) и Казань (Татарстан) = 3 000 ₽
+    // Остальные регионы = 2 500 ₽
+    // «Любой регион» = 2 300 ₽
+    const REGIONS = [
+      { code: 'RANDOM', name: 'Любой регион (случайный)', isRandom: true, cost: 2300, mult: 1.0, badge: 'Скидка 2 300 ₽' },
+      
+      // Топовые регионы (3 000 ₽)
+      { code: '77', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+      { code: '777', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+      { code: '99', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+      { code: '97', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+      { code: '177', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+      { code: '197', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+      { code: '199', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+      { code: '797', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+      { code: '799', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+      { code: '50', name: 'Московская обл.', isCapital: true, isTop: true, cost: 3000, mult: 1.3 },
+      { code: '90', name: 'Московская обл.', isCapital: true, isTop: true, cost: 3000, mult: 1.3 },
+      { code: '150', name: 'Московская обл.', isCapital: true, isTop: true, cost: 3000, mult: 1.3 },
+      { code: '190', name: 'Московская обл.', isCapital: true, isTop: true, cost: 3000, mult: 1.3 },
+      { code: '750', name: 'Московская обл.', isCapital: true, isTop: true, cost: 3000, mult: 1.3 },
+      { code: '78', name: 'Санкт-Петербург', isTop: true, cost: 3000, mult: 1.3 },
+      { code: '98', name: 'Санкт-Петербург', isTop: true, cost: 3000, mult: 1.3 },
+      { code: '178', name: 'Санкт-Петербург', isTop: true, cost: 3000, mult: 1.3 },
+      { code: '198', name: 'Санкт-Петербург', isTop: true, cost: 3000, mult: 1.3 },
+      { code: '16', name: 'Татарстан (Казань)', isTop: true, cost: 3000, mult: 1.25 },
+      { code: '116', name: 'Татарстан (Казань)', isTop: true, cost: 3000, mult: 1.25 },
+      { code: '716', name: 'Татарстан (Казань)', isTop: true, cost: 3000, mult: 1.25 },
+      { code: '66', name: 'Свердловская обл. (Екб)', isTop: true, cost: 3000, mult: 1.25 },
+      { code: '96', name: 'Свердловская обл. (Екб)', isTop: true, cost: 3000, mult: 1.25 },
+      { code: '196', name: 'Свердловская обл. (Екб)', isTop: true, cost: 3000, mult: 1.25 },
+
+      // Все остальные субъекты и регионы РФ (2 500 ₽)
+      { code: '01', name: 'Адыгея', cost: 2500, mult: 1.0 },
+      { code: '02', name: 'Башкортостан', cost: 2500, mult: 1.0 },
+      { code: '102', name: 'Башкортостан', cost: 2500, mult: 1.0 },
+      { code: '03', name: 'Бурятия', cost: 2500, mult: 1.0 },
+      { code: '04', name: 'Республика Алтай', cost: 2500, mult: 1.0 },
+      { code: '05', name: 'Дагестан', cost: 2500, mult: 1.0 },
+      { code: '06', name: 'Ингушетия', cost: 2500, mult: 1.0 },
+      { code: '07', name: 'Кабардино-Балкария', cost: 2500, mult: 1.0 },
+      { code: '08', name: 'Калмыкия', cost: 2500, mult: 1.0 },
+      { code: '09', name: 'Карачаево-Черкесия', cost: 2500, mult: 1.0 },
+      { code: '10', name: 'Карелия', cost: 2500, mult: 1.0 },
+      { code: '11', name: 'Республика Коми', cost: 2500, mult: 1.0 },
+      { code: '12', name: 'Марий Эл', cost: 2500, mult: 1.0 },
+      { code: '13', name: 'Мордовия', cost: 2500, mult: 1.0 },
+      { code: '14', name: 'Якутия (Саха)', cost: 2500, mult: 1.0 },
+      { code: '15', name: 'Северная Осетия', cost: 2500, mult: 1.0 },
+      { code: '17', name: 'Тыва', cost: 2500, mult: 1.0 },
+      { code: '18', name: 'Удмуртия', cost: 2500, mult: 1.0 },
+      { code: '19', name: 'Хакасия', cost: 2500, mult: 1.0 },
+      { code: '21', name: 'Чувашия', cost: 2500, mult: 1.0 },
+      { code: '22', name: 'Алтайский край', cost: 2500, mult: 1.0 },
+      { code: '23', name: 'Краснодарский край', cost: 2500, mult: 1.15 },
+      { code: '93', name: 'Краснодарский край', cost: 2500, mult: 1.15 },
+      { code: '123', name: 'Краснодарский край', cost: 2500, mult: 1.15 },
+      { code: '193', name: 'Краснодарский край', cost: 2500, mult: 1.15 },
+      { code: '24', name: 'Красноярский край', cost: 2500, mult: 1.0 },
+      { code: '124', name: 'Красноярский край', cost: 2500, mult: 1.0 },
+      { code: '25', name: 'Приморский край', cost: 2500, mult: 1.1 },
+      { code: '125', name: 'Приморский край', cost: 2500, mult: 1.1 },
+      { code: '26', name: 'Ставропольский край', cost: 2500, mult: 1.0 },
+      { code: '126', name: 'Ставропольский край', cost: 2500, mult: 1.0 },
+      { code: '27', name: 'Хабаровский край', cost: 2500, mult: 1.0 },
+      { code: '28', name: 'Амурская обл.', cost: 2500, mult: 1.0 },
+      { code: '29', name: 'Архангельская обл.', cost: 2500, mult: 1.0 },
+      { code: '30', name: 'Астраханская обл.', cost: 2500, mult: 1.0 },
+      { code: '31', name: 'Белгородская обл.', cost: 2500, mult: 1.0 },
+      { code: '32', name: 'Брянская обл.', cost: 2500, mult: 1.0 },
+      { code: '33', name: 'Владимирская обл.', cost: 2500, mult: 1.0 },
+      { code: '34', name: 'Волгоградская обл.', cost: 2500, mult: 1.0 },
+      { code: '134', name: 'Волгоградская обл.', cost: 2500, mult: 1.0 },
+      { code: '35', name: 'Вологодская обл.', cost: 2500, mult: 1.0 },
+      { code: '36', name: 'Воронежская обл.', cost: 2500, mult: 1.0 },
+      { code: '136', name: 'Воронежская обл.', cost: 2500, mult: 1.0 },
+      { code: '37', name: 'Ивановская обл.', cost: 2500, mult: 1.0 },
+      { code: '38', name: 'Иркутская обл.', cost: 2500, mult: 1.0 },
+      { code: '138', name: 'Иркутская обл.', cost: 2500, mult: 1.0 },
+      { code: '39', name: 'Калининградская обл.', cost: 2500, mult: 1.05 },
+      { code: '40', name: 'Калужская обл.', cost: 2500, mult: 1.0 },
+      { code: '41', name: 'Камчатский край', cost: 2500, mult: 1.0 },
+      { code: '42', name: 'Кемеровская обл. (Кузбасс)', cost: 2500, mult: 1.0 },
+      { code: '142', name: 'Кемеровская обл.', cost: 2500, mult: 1.0 },
+      { code: '43', name: 'Кировская обл.', cost: 2500, mult: 1.0 },
+      { code: '44', name: 'Костромская обл.', cost: 2500, mult: 1.0 },
+      { code: '45', name: 'Курганская обл.', cost: 2500, mult: 1.0 },
+      { code: '46', name: 'Курская обл.', cost: 2500, mult: 1.0 },
+      { code: '47', name: 'Ленинградская обл.', cost: 2500, mult: 1.1 },
+      { code: '147', name: 'Ленинградская обл.', cost: 2500, mult: 1.1 },
+      { code: '48', name: 'Липецкая обл.', cost: 2500, mult: 1.0 },
+      { code: '49', name: 'Магаданская обл.', cost: 2500, mult: 1.0 },
+      { code: '51', name: 'Мурманская обл.', cost: 2500, mult: 1.0 },
+      { code: '52', name: 'Нижегородская обл.', cost: 2500, mult: 1.05 },
+      { code: '152', name: 'Нижегородская обл.', cost: 2500, mult: 1.05 },
+      { code: '53', name: 'Новгородская обл.', cost: 2500, mult: 1.0 },
+      { code: '54', name: 'Новосибирская обл.', cost: 2500, mult: 1.05 },
+      { code: '154', name: 'Новосибирская обл.', cost: 2500, mult: 1.05 },
+      { code: '55', name: 'Омская обл.', cost: 2500, mult: 1.0 },
+      { code: '56', name: 'Оренбургская обл.', cost: 2500, mult: 1.0 },
+      { code: '57', name: 'Орловская обл.', cost: 2500, mult: 1.0 },
+      { code: '58', name: 'Пензенская обл.', cost: 2500, mult: 1.0 },
+      { code: '59', name: 'Пермский край', cost: 2500, mult: 1.0 },
+      { code: '159', name: 'Пермский край', cost: 2500, mult: 1.0 },
+      { code: '60', name: 'Псковская обл.', cost: 2500, mult: 1.0 },
+      { code: '61', name: 'Ростовская обл.', cost: 2500, mult: 1.05 },
+      { code: '161', name: 'Ростовская обл.', cost: 2500, mult: 1.05 },
+      { code: '62', name: 'Рязанская обл.', cost: 2500, mult: 1.0 },
+      { code: '63', name: 'Самарская обл.', cost: 2500, mult: 1.05 },
+      { code: '163', name: 'Самарская обл.', cost: 2500, mult: 1.05 },
+      { code: '64', name: 'Саратовская обл.', cost: 2500, mult: 1.0 },
+      { code: '65', name: 'Сахалинская обл.', cost: 2500, mult: 1.0 },
+      { code: '67', name: 'Смоленская обл.', cost: 2500, mult: 1.0 },
+      { code: '68', name: 'Тамбовская обл.', cost: 2500, mult: 1.0 },
+      { code: '69', name: 'Тверская обл.', cost: 2500, mult: 1.0 },
+      { code: '70', name: 'Томская обл.', cost: 2500, mult: 1.0 },
+      { code: '71', name: 'Тульская обл.', cost: 2500, mult: 1.0 },
+      { code: '72', name: 'Тюменская обл.', cost: 2500, mult: 1.05 },
+      { code: '73', name: 'Ульяновская обл.', cost: 2500, mult: 1.0 },
+      { code: '74', name: 'Челябинская обл.', cost: 2500, mult: 1.05 },
+      { code: '174', name: 'Челябинская обл.', cost: 2500, mult: 1.05 },
+      { code: '75', name: 'Забайкальский край', cost: 2500, mult: 1.0 },
+      { code: '76', name: 'Ярославская обл.', cost: 2500, mult: 1.0 },
+      { code: '79', name: 'Еврейская АО', cost: 2500, mult: 1.0 },
+      { code: '82', name: 'Крым', cost: 2500, mult: 1.05 },
+      { code: '83', name: 'Ненецкий АО', cost: 2500, mult: 1.0 },
+      { code: '86', name: 'ХМАО — Югра', cost: 2500, mult: 1.05 },
+      { code: '186', name: 'ХМАО — Югра', cost: 2500, mult: 1.05 },
+      { code: '87', name: 'Чукотский АО', cost: 2500, mult: 1.0 },
+      { code: '89', name: 'ЯНАО', cost: 2500, mult: 1.05 },
+      { code: '92', name: 'Севастополь', cost: 2500, mult: 1.05 },
+      { code: '95', name: 'Чеченская Республика', cost: 2500, mult: 1.1 }
+    ];
+
+    // Базовые коэффициенты ставок относительно выбранного региона:
+    const BET_TIERS = [
+      { id: 'common', title: 'Обычная крутка', subtitle: 'любой номер', mult: 1, fixedCost: null, minRarity: 0, color: 'text-white' },
+      { id: 'uncommon', title: 'Необычный и выше', subtitle: 'гарантия редкости', mult: null, fixedCost: 11000, minRarity: 1, color: 'text-[#22c55e]' },
+      { id: 'rare', title: 'Редкий и выше', subtitle: 'гарантия редкости', mult: null, fixedCost: 60000, minRarity: 2, color: 'text-[#0a84ff]' },
+      { id: 'epic', title: 'Эпический и выше', subtitle: 'гарантия редкости', mult: null, fixedCost: 250000, minRarity: 3, color: 'text-[#bf5af2]' },
+      { id: 'legendary', title: 'Легендарный и выше', subtitle: 'гарантия редкости', mult: null, fixedCost: 800000, minRarity: 4, color: 'text-[#ffd60a]' }
+    ];
+
+    // Расчет стоимости ставки с учетом региона
+    function getBetSingleCost(betTierId) {
+      const selectedReg = REGIONS[state.currentRegionIndex] || REGIONS[0];
+      const tier = BET_TIERS.find(b => b.id === betTierId) || BET_TIERS[0];
+      if (tier.id === 'common') {
+        return selectedReg.cost;
+      }
+      return tier.fixedCost;
+    }
+
+    let state = {
+      currentTab: 'plates', // 'plates' или 'cars'
+      level: 1,
+      currentXp: 0,
+      balance: 100000,
+      clovers: 100,
+      isSpin5x: false,
+      selectedBetId: 'common',
+      currentRegionIndex: 0,
+      isRolling: false,
+      currentPlate: null,
+      isCurrentSavedToGarage: false,
+      isCurrentSold: false,
+      pendingSpin5List: [],
+      garage: [],
+      activeContainerId: 'common_case',
+      isRouletteSpinning: false,
+      currentDroppedCar: null
+    };
+
+    /* Вкладки: Номера / Машины */
+    function switchAppTab(tab) {
+      state.currentTab = tab;
+      const tabPlates = document.getElementById('tabBtnPlates');
+      const tabCars = document.getElementById('tabBtnCars');
+      const secPlates = document.getElementById('sectionPlatesView');
+      const secCars = document.getElementById('sectionCarsView');
+      const navPlay = document.getElementById('navBtnPlay');
+
+      if (tab === 'plates') {
+        tabPlates.className = 'flex-1 py-1.5 text-xs font-bold rounded-xl bg-[#3a3a3c] text-white shadow transition';
+        tabCars.className = 'flex-1 py-1.5 text-xs font-bold rounded-xl text-[#8e8e93] hover:text-white transition';
+        secPlates.classList.remove('hidden');
+        secCars.classList.add('hidden');
+        if (navPlay) navPlay.className = 'flex flex-col items-center gap-0.5 text-[#22c55e] active:scale-95 transition';
+      } else {
+        tabCars.className = 'flex-1 py-1.5 text-xs font-bold rounded-xl bg-[#3a3a3c] text-white shadow transition';
+        tabPlates.className = 'flex-1 py-1.5 text-xs font-bold rounded-xl text-[#8e8e93] hover:text-white transition';
+        secPlates.classList.add('hidden');
+        secCars.classList.remove('hidden');
+        if (navPlay) navPlay.className = 'flex flex-col items-center gap-0.5 text-[#8e8e93] active:scale-95 transition';
+      }
+      lucide.createIcons();
+    }
+
+    /* Модальное окно информации о контейнере */
+    function openContainerInfoModal(containerId) {
+      state.activeContainerId = containerId;
+      const cfg = CONTAINERS_CONFIG[containerId];
+      if (!cfg) return;
+
+      document.getElementById('containerModalTitle').textContent = cfg.name;
+      document.getElementById('containerModalIcon').innerHTML = cfg.iconSvg;
+      document.getElementById('btnOpenContainerDirect').textContent = `Открыть за ${fmt(cfg.cost)} ₽`;
+
+      const list = document.getElementById('containerChancesList');
+      list.innerHTML = '';
+
+      cfg.chances.forEach(ch => {
+        const rar = CAR_RARITIES[ch.rarity];
+        const carNames = CAR_POOL[ch.rarity].map(c => c.name).slice(0, 3).join(', ') + '...';
+        
+        const row = document.createElement('div');
+        row.className = `p-2.5 rounded-2xl bg-[#242426] border border-[#2c2c2e] flex items-center justify-between text-xs shadow-sm ${rar.border}`;
+        row.innerHTML = `
+          <div class="flex items-center gap-2 truncate pr-2">
+            <span class="font-extrabold" style="color: ${rar.color}">${rar.name}</span>
+            <span class="text-[11px] text-[#8e8e93] truncate">${carNames}</span>
+          </div>
+          <span class="font-mono font-black text-white shrink-0">${ch.pct}</span>
+        `;
+        list.appendChild(row);
+      });
+
+      openModal('modalContainerInfo');
+    }
+
+    /* Запуск CS-рулетки открытия контейнера */
+    function triggerContainerOpenProcess() {
+      const cfg = CONTAINERS_CONFIG[state.activeContainerId];
+      if (!cfg) return;
+
+      if (state.balance < cfg.cost) {
+        showToast('Недостаточно рублей для открытия контейнера!');
+        return;
+      }
+
+      initAudio();
+      closeModal('modalContainerInfo');
+
+      // Списание баланса
+      state.balance -= cfg.cost;
+      showBalanceDelta(cfg.cost, false);
+      updateUI();
+      saveState();
+
+      // Определение выигрышного авто по шансам
+      const rand = Math.random() * 100;
+      let cumulative = 0;
+      let wonRarity = cfg.chances[0].rarity;
+
+      for (let ch of cfg.chances) {
+        cumulative += ch.num;
+        if (rand <= cumulative) {
+          wonRarity = ch.rarity;
+          break;
+        }
+      }
+
+      const pool = CAR_POOL[wonRarity];
+      const selectedModel = getRandomItem(pool);
+      const wonPrice = Math.round(selectedModel.minPrice + Math.random() * (selectedModel.maxPrice - selectedModel.minPrice));
+
+      state.currentDroppedCar = {
+        id: Date.now() + Math.random(),
+        type: 'car',
+        name: selectedModel.name,
+        rarity: wonRarity,
+        price: wonPrice,
+        containerName: cfg.name
+      };
+
+      startCaseRoulette(cfg, state.currentDroppedCar);
+    }
+
+    /* Анимация горизонтальной рулетки */
+    function startCaseRoulette(cfg, winningCar) {
+      state.isRouletteSpinning = true;
+      openModal('modalCaseRoulette');
+      document.getElementById('rouletteCaseNameHeader').textContent = cfg.name;
+      document.getElementById('rouletteResultBox').classList.add('hidden');
+      document.getElementById('rouletteSpinningIndicator').classList.remove('hidden');
+
+      const track = document.getElementById('rouletteTrack');
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(0px)';
+      track.innerHTML = '';
+
+      // Допустимые редкости только из текущего контейнера (без запрещённых категорий)
+      const allowedCaseRarities = cfg.chances.map(c => c.rarity);
+      const totalCards = 40;
+      const winningIndex = 30;
+
+      for (let i = 0; i < totalCards; i++) {
+        let cardData;
+        if (i === winningIndex) {
+          cardData = winningCar;
+        } else {
+          const rRarity = getRandomItem(allowedCaseRarities);
+          const rModel = getRandomItem(CAR_POOL[rRarity]);
+          cardData = { name: rModel.name, rarity: rRarity };
+        }
+
+        const rar = CAR_RARITIES[cardData.rarity];
+        const card = document.createElement('div');
+        card.className = `w-28 h-24 shrink-0 rounded-2xl bg-[#242426] border border-[#3a3a3c] flex flex-col items-center justify-center p-2 text-center select-none shadow-md ${rar.border}`;
+        card.innerHTML = `
+          <div class="text-2xl mb-1">🚗</div>
+          <div class="text-[11px] font-black text-white leading-tight truncate w-full">${cardData.name}</div>
+          <div class="text-[9px] font-bold uppercase mt-0.5" style="color: ${rar.color}">${rar.name}</div>
+        `;
+        track.appendChild(card);
+      }
+
+      // Запуск плавной анимации прокрутки
+      const cardWidth = 112 + 12; // 112px ширина + 12px gap
+      const offsetCenter = (winningIndex * cardWidth) - (window.innerWidth > 448 ? 160 : window.innerWidth / 2 - 56);
+      const randomJitter = (Math.random() - 0.5) * 45; // случайное смещение внутри карточки
+      const finalTranslate = -(offsetCenter + randomJitter);
+
+      setTimeout(() => {
+        track.style.transition = 'transform 4.5s cubic-bezier(0.12, 0.8, 0.2, 1)';
+        track.style.transform = `translateX(${finalTranslate}px)`;
+        
+        // Звуки тикания во время прокрутки
+        let ticks = 0;
+        const tickTimer = setInterval(() => {
+          ticks++;
+          playBeep("C5");
+          if (ticks > 25) clearInterval(tickTimer);
+        }, 160);
+      }, 50);
+
+      // Завершение рулетки
+      setTimeout(() => {
+        state.isRouletteSpinning = false;
+        playCoin();
+        playBeep("G5");
+
+        document.getElementById('rouletteSpinningIndicator').classList.add('hidden');
+        const resBox = document.getElementById('rouletteResultBox');
+        resBox.classList.remove('hidden');
+
+        document.getElementById('resultCarName').textContent = winningCar.name;
+        const rar = CAR_RARITIES[winningCar.rarity];
+        const rarEl = document.getElementById('resultCarRarity');
+        rarEl.textContent = rar.name;
+        rarEl.style.color = rar.color;
+        document.getElementById('resultCarPrice').textContent = `${fmt(winningCar.price)} ₽`;
+
+        // Начисление XP за открытие авто
+        const xpMap = { common: 5, uncommon: 15, rare: 45, epic: 140, legendary: 380, mythic: 1000 };
+        addXp(xpMap[winningCar.rarity] || 25);
+      }, 4600);
+    }
+
+    /* Продажа авто из рулетки */
+    function sellRouletteDroppedCar() {
+      if (!state.currentDroppedCar) return;
+      state.balance += state.currentDroppedCar.price;
+      showBalanceDelta(state.currentDroppedCar.price, true);
+      playCoin();
+      showToast(`Автомобиль продан за +${fmt(state.currentDroppedCar.price)} ₽!`);
+      closeModal('modalCaseRoulette');
+      state.currentDroppedCar = null;
+      updateUI();
+      saveState();
+    }
+
+    /* Сохранение авто в гараж из рулетки */
+    function garageRouletteDroppedCar() {
+      if (!state.currentDroppedCar) return;
+      state.garage.unshift(state.currentDroppedCar);
+      playBeep("C6");
+      showToast('Автомобиль успешно отправлен в Гараж!');
+      closeModal('modalCaseRoulette');
+      state.currentDroppedCar = null;
+      updateUI();
+      saveState();
+    }
+
+    /* Сохранение в localStorage */
+    function saveState() {
+      try {
+        localStorage.setItem('plates_game_v6', JSON.stringify({
+          level: state.level,
+          currentXp: state.currentXp,
+          balance: state.balance,
+          clovers: state.clovers,
+          isSpin5x: state.isSpin5x,
+          selectedBetId: state.selectedBetId,
+          currentRegionIndex: state.currentRegionIndex,
+          garage: state.garage
+        }));
+      } catch(e) {}
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem('plates_game_v6');
+        if (raw) {
+          const d = JSON.parse(raw);
+          state.level = d.level || 1;
+          state.currentXp = d.currentXp || 0;
+          state.balance = typeof d.balance === 'number' ? d.balance : 100000;
+          state.clovers = typeof d.clovers === 'number' ? d.clovers : 100;
+          state.isSpin5x = !!d.isSpin5x;
+          state.selectedBetId = d.selectedBetId || 'common';
+          state.currentRegionIndex = d.currentRegionIndex || 0;
+          state.garage = Array.isArray(d.garage) ? d.garage : [];
+        }
+      } catch(e) {}
+    }
+
+    /* Звуковой движок */
+    let synth = null, coinSynth = null;
+    function initAudio() {
+      if (!synth && window.Tone) {
+        Tone.start();
+        synth = new Tone.PolySynth(Tone.Synth).toDestination();
+        synth.volume.value = -12;
+        coinSynth = new Tone.MetalSynth({
+          frequency: 250,
+          envelope: { attack: 0.001, decay: 0.08, release: 0.01 },
+          harmonicity: 3.1,
+          modulationIndex: 16,
+          resonance: 4000
+        }).toDestination();
+        coinSynth.volume.value = -18;
+      }
+    }
+    function playCoin() { try { coinSynth?.triggerAttackRelease('16n'); } catch (e) {} }
+    function playBeep(note = "C5") { try { synth?.triggerAttackRelease(note, "16n"); } catch (e) {} }
+
+    function fmt(n) {
+      return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     }
 
     function showToast(text) {
-      const toast = document.getElementById('toast');
-      toast.innerText = text;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2200);
-    }
-
-    // Навигация по экранам
-    function goToScreen(screenId) {
-      triggerHaptic('selection_change');
-
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      const target = document.getElementById(screenId);
-      if (target) target.classList.add('active');
-
-      document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-      if (screenId === 'screen-home' || screenId === 'screen-form') {
-        document.getElementById('nav-home')?.classList.add('active');
-        if (tg?.BackButton) tg.BackButton.hide();
-      } else {
-        if (tg?.BackButton) tg.BackButton.show();
-        if (screenId === 'screen-meters') document.getElementById('nav-meters')?.classList.add('active');
-        else if (screenId === 'screen-pay') document.getElementById('nav-pay')?.classList.add('active');
-        else if (screenId === 'screen-history') document.getElementById('nav-history')?.classList.add('active');
-      }
-
-      window.scrollTo(0, 0);
-    }
-
-    // Переключение вкладок в Профиле
-    function switchProfileTab(tabName) {
-      triggerHaptic('selection_change');
-
-      document.getElementById('tab-btn-benefits').classList.toggle('active', tabName === 'benefits');
-      document.getElementById('tab-btn-requests').classList.toggle('active', tabName === 'requests');
-      document.getElementById('tab-btn-history').classList.toggle('active', tabName === 'history');
-
-      document.getElementById('tab-content-benefits').classList.toggle('active', tabName === 'benefits');
-      document.getElementById('tab-content-requests').classList.toggle('active', tabName === 'requests');
-      document.getElementById('tab-content-history').classList.toggle('active', tabName === 'history');
-    }
-
-    // Барабанчики
-    function renderDigits(containerId, value) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      const str = String(value).padStart(5, '0');
-      let html = '';
-      for (let c of str) {
-        html += `<div class="digit-cell">${c}</div>`;
-      }
-      html += `<span class="unit-tag">м³</span>`;
-      container.innerHTML = html;
-    }
-
-    // Синхронизация всех отображений
-    function updateAllViews() {
-      const acc = state.accounts[state.currentAccount];
-
-      renderDigits('coldDigitsContainer', acc.coldVal);
-      renderDigits('hotDigitsContainer', acc.hotVal);
-
-      const manCold = document.getElementById('manualInputCold');
-      const manHot = document.getElementById('manualInputHot');
-      if (manCold && document.activeElement !== manCold) manCold.value = acc.coldVal;
-      if (manHot && document.activeElement !== manHot) manHot.value = acc.hotVal;
-
-      const coldDiff = Math.max(0, acc.coldVal - acc.coldPrev);
-      const hotDiff = Math.max(0, acc.hotVal - acc.hotPrev);
-
-      document.getElementById('coldConsumptionDisplay').innerText = String(coldDiff).padStart(3, '0');
-      document.getElementById('hotConsumptionDisplay').innerText = String(hotDiff).padStart(3, '0');
-
-      document.getElementById('coldAnomalyBadge').style.display = coldDiff > 25 ? 'block' : 'none';
-      document.getElementById('hotAnomalyBadge').style.display = hotDiff > 25 ? 'block' : 'none';
-
-      const payCold = document.getElementById('payInputCold');
-      const payHot = document.getElementById('payInputHot');
-      if (payCold && document.activeElement !== payCold) payCold.value = acc.coldVal;
-      if (payHot && document.activeElement !== payHot) payHot.value = acc.hotVal;
-
-      const baseSum = Math.round(((coldDiff * 50.93) + (hotDiff * 190.50) + ((coldDiff + hotDiff) * 39.97)) * 0.5);
-      const totalSum = Math.max(1250, baseSum);
-
-      document.getElementById('homeDueAmount').innerText = `${totalSum.toLocaleString('ru-RU')} ₽`;
-      updatePayButtonText(totalSum);
-
-      document.getElementById('historyLiveCold').innerText = `${String(acc.coldVal).padStart(5, '0')} м³`;
-      document.getElementById('historyLiveHot').innerText = `${String(acc.hotVal).padStart(5, '0')} м³`;
-
-      const coldBarHeight = Math.min(75, Math.max(12, coldDiff * 3));
-      const hotBarHeight = Math.min(75, Math.max(12, hotDiff * 3));
-      document.getElementById('chartBarColdLive').style.height = `${coldBarHeight}px`;
-      document.getElementById('chartBarHotLive').style.height = `${hotBarHeight}px`;
-    }
-
-    function updatePayButtonText(sum) {
-      const btn = document.getElementById('paySubmitBtn');
-      const amount = sum || 1250;
-      let label = 'через СБП';
-      if (state.selectedPayMethod === 'sber') label = 'через СберПэй';
-      if (state.selectedPayMethod === 'tpay') label = 'через Т-Пэй';
-      btn.innerText = `Оплатить ${label}: ${amount.toLocaleString('ru-RU')} ₽`;
-    }
-
-    // Ручной ввод показаний с клавиатуры
-    function handleManualMeterInput(type, valStr) {
-      const acc = state.accounts[state.currentAccount];
-      const val = parseInt(valStr, 10);
-      if (isNaN(val)) return;
-
-      if (type === 'cold') acc.coldVal = Math.max(0, val);
-      if (type === 'hot') acc.hotVal = Math.max(0, val);
-
-      updateAllViews();
-    }
-
-    function adjustMeterVal(type, delta) {
-      triggerHaptic('light');
-      const acc = state.accounts[state.currentAccount];
-      if (type === 'cold') acc.coldVal = Math.max(acc.coldPrev, acc.coldVal + delta);
-      if (type === 'hot') acc.hotVal = Math.max(acc.hotPrev, acc.hotVal + delta);
-      updateAllViews();
-    }
-
-    function syncFromPaymentInputs() {
-      const acc = state.accounts[state.currentAccount];
-      acc.coldVal = parseInt(document.getElementById('payInputCold').value, 10) || acc.coldPrev;
-      acc.hotVal = parseInt(document.getElementById('payInputHot').value, 10) || acc.hotPrev;
-      updateAllViews();
-    }
-
-    function selectPayMethod(method) {
-      triggerHaptic('light');
-      state.selectedPayMethod = method;
-      document.getElementById('pay-method-sbp').classList.toggle('active', method === 'sbp');
-      document.getElementById('pay-method-sber').classList.toggle('active', method === 'sber');
-      document.getElementById('pay-method-tpay').classList.toggle('active', method === 'tpay');
-      updatePayButtonText();
-    }
-
-    function switchAccount(accKey) {
-      triggerHaptic('medium');
-      state.currentAccount = accKey;
-      const acc = state.accounts[accKey];
-
-      document.getElementById('homeAccountTitle').innerText = acc.title;
-      document.getElementById('homeCardAddress').innerText = `Адрес: ${acc.address}, кв. ${acc.apartment} • Лицевой: ${acc.accountNumber}`;
-      document.getElementById('outageAddressDisplay').innerText = acc.address;
-      document.getElementById('modalOutageAddress').innerText = acc.address;
-      document.getElementById('meterScreenAccountLabel').innerText = `${acc.title} | ${acc.accountNumber}`;
-      document.getElementById('meterScreenAddressLabel').innerText = `${acc.address}, кв. ${acc.apartment}`;
-      document.getElementById('payPersonName').innerText = acc.owner;
-      document.getElementById('payAddressDetail').innerText = `${acc.address}, кв. ${acc.apartment} (Этаж: ${acc.floor})`;
-      document.getElementById('payCadastralDetail').innerText = acc.cadastral;
-      document.getElementById('benefitAccountDisplay').innerText = acc.accountNumber;
-
-      document.getElementById('inputAddress').value = acc.address;
-      document.getElementById('inputApartment').value = acc.apartment;
-      document.getElementById('inputFloor').value = acc.floor;
-      document.getElementById('inputCadastral').value = acc.cadastral;
-
-      updateAllViews();
-      showToast(`Выбран объект: ${acc.title}`);
-    }
-
-    function saveSubscriberData() {
-      triggerHaptic('success');
-      const acc = state.accounts[state.currentAccount];
-      acc.address = document.getElementById('inputAddress').value.trim();
-      acc.apartment = document.getElementById('inputApartment').value.trim();
-      acc.floor = document.getElementById('inputFloor').value.trim();
-      acc.cadastral = document.getElementById('inputCadastral').value.trim();
-
-      switchAccount(state.currentAccount);
-      showToast('Данные успешно сохранены!');
-      goToScreen('screen-home');
-    }
-
-    // Управление модальными окнами
-    function openOutageModal() {
-      triggerHaptic('medium');
-      document.getElementById('outageModal').classList.add('active');
-    }
-    function closeOutageModal() {
-      triggerHaptic('light');
-      document.getElementById('outageModal').classList.remove('active');
-    }
-
-    function openMeterInfoModal(type) {
-      triggerHaptic('medium');
-      const acc = state.accounts[state.currentAccount];
-      const isCold = type === 'cold';
-      document.getElementById('infoMeterTitle').innerText = `${isCold ? 'ХВС' : 'ГВС'} №98489`;
-      document.getElementById('infoMeterValue').innerText = `${String(isCold ? acc.coldVal : acc.hotVal).padStart(5, '0')} м³`;
-      document.getElementById('infoMeterDiff').innerText = `${Math.max(0, (isCold ? acc.coldVal - acc.coldPrev : acc.hotVal - acc.hotPrev))} м³`;
-      document.getElementById('meterInfoModal').classList.add('active');
-    }
-    function closeMeterInfoModal() {
-      triggerHaptic('light');
-      document.getElementById('meterInfoModal').classList.remove('active');
-    }
-
-    function openMasterModal() {
-      triggerHaptic('medium');
-      document.getElementById('masterModal').classList.add('active');
-    }
-    function closeMasterModal() {
-      triggerHaptic('light');
-      document.getElementById('masterModal').classList.remove('active');
-    }
-    function submitMasterBooking() {
-      triggerHaptic('success');
-      closeMasterModal();
-      showToast('Заявка мастеру отправлена!');
-    }
-
-    function scheduleBotReminder() {
-      triggerHaptic('success');
-      showToast('Напоминание 15-го числа установлено в боте!');
-    }
-
-    function downloadReceiptPDF() {
-      triggerHaptic('light');
-      showToast('Квитанция ЕПД (PDF) сформирована!');
-    }
-
-    function sendReceiptToBot() {
-      triggerHaptic('success');
-      showToast('Электронный чек отправлен в чат Telegram!');
-    }
-
-    function submitMeters() {
-      triggerHaptic('success');
-      showToast('Показания успешно переданы!');
-      setTimeout(() => goToScreen('screen-home'), 900);
-    }
-
-    function processPayment() {
-      triggerHaptic('success');
-      let methodText = 'СБП';
-      if (state.selectedPayMethod === 'sber') methodText = 'СберПэй';
-      if (state.selectedPayMethod === 'tpay') methodText = 'Т-Пэй';
-      showToast(`Переход в банк (${methodText})...`);
-    }
-
-    function sendBotMessage() {
-      const input = document.getElementById('botMsgInput');
-      const text = input.value.trim();
-      if (!text) return;
-      triggerHaptic('light');
-
-      const chat = document.getElementById('botChatArea');
-      const userMsg = document.createElement('div');
-      userMsg.className = 'msg-bubble msg-outgoing';
-      userMsg.innerHTML = `${text}<div class="msg-time">Только что</div>`;
-      chat.appendChild(userMsg);
-      input.value = '';
-      chat.scrollTop = chat.scrollHeight;
-
+      const t = document.getElementById('toast');
+      t.innerText = text;
+      t.classList.remove('opacity-0', '-translate-y-2');
+      t.classList.add('opacity-100', 'translate-y-0');
       setTimeout(() => {
-        triggerHaptic('medium');
-        const botMsg = document.createElement('div');
-        botMsg.className = 'msg-bubble msg-incoming';
-        botMsg.innerHTML = `Запрос "${text}" принят в работу. Горячая линия Мосводоканала: 8 (499) 763-34-34.<div class="msg-time">Только что</div>`;
-        chat.appendChild(botMsg);
-        chat.scrollTop = chat.scrollHeight;
-      }, 600);
+        t.classList.add('opacity-0', '-translate-y-2');
+        t.classList.remove('opacity-100', 'translate-y-0');
+      }, 2000);
     }
 
-    // Запуск приложения
-    window.addEventListener('DOMContentLoaded', () => {
+    function showBalanceDelta(amount, isPositive) {
+      const el = document.getElementById('balanceDelta');
+      if (!el) return;
+      el.classList.remove('hidden', 'balance-delta-anim');
+      void el.offsetWidth;
+      if (isPositive) {
+        el.className = 'absolute -bottom-4 right-0 text-[11px] font-black font-mono text-emerald-400 balance-delta-anim';
+        el.textContent = `+${fmt(amount)} ₽`;
+      } else {
+        el.className = 'absolute -bottom-4 right-0 text-[11px] font-black font-mono text-rose-400 balance-delta-anim';
+        el.textContent = `-${fmt(amount)} ₽`;
+      }
+      setTimeout(() => el.classList.add('hidden'), 1200);
+    }
+
+    /* =========================================================
+       СТРОГАЯ ГЕНЕРАЦИЯ С РАСЧЁТОМ МНОЖИТЕЛЕЙ ПО СКРИНШОТАМ
+       ========================================================= */
+    function getRandomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function generatePlateWithDynamicModifiers(betTierId = 'common') {
+      const isSuperLuck = (state.clovers === 1);
+      let selectedReg = REGIONS[state.currentRegionIndex] || REGIONS[0];
+      
+      // Если выбран режим «Любой регион (случайный)», выбираем случайный субъект из списка (кроме нулевого)
+      let regionObj = selectedReg;
+      if (selectedReg.isRandom) {
+        const nonRandomList = REGIONS.filter(r => !r.isRandom);
+        regionObj = getRandomItem(nonRandomList);
+      }
+      
+      let l1 = getRandomItem(ALLOWED_LETTERS);
+      let l2 = getRandomItem(ALLOWED_LETTERS);
+      let l3 = getRandomItem(ALLOWED_LETTERS);
+      let d1 = Math.floor(Math.random() * 10).toString();
+      let d2 = Math.floor(Math.random() * 10).toString();
+      let d3 = Math.floor(Math.random() * 10).toString();
+
+      let targetRarity = 0;
+      const roll = Math.random();
+
+      // СБАЛАНСИРОВАННЫЕ ВЕРОЯТНОСТИ (МИКРО-ШАНС НА МИФИК И СЕКРЕТ)
+      if (isSuperLuck) {
+        if (roll < 0.002) targetRarity = 6;      // Секретный 0.2%
+        else if (roll < 0.02) targetRarity = 5;  // Мифический 1.8%
+        else if (roll < 0.35) targetRarity = 4;  // Легендарный 33%
+        else targetRarity = 3;                   // Эпический 65%
+      } else if (betTierId === 'legendary') {
+        // Ставка Легендарная: 99.7% строго легендарки, мифик и секрет — ультраредкий джекпот
+        if (roll < 0.0003) targetRarity = 6;     // Секретный 0.03% (1 из ~3300)
+        else if (roll < 0.003) targetRarity = 5; // Мифический 0.27% (1 из ~370)
+        else targetRarity = 4;                   // Легендарный 99.7%
+      } else if (betTierId === 'epic') {
+        if (roll < 0.00005) targetRarity = 6;    // Секретный 0.005%
+        else if (roll < 0.001) targetRarity = 5; // Мифический 0.1%
+        else if (roll < 0.10) targetRarity = 4;  // Легендарный ~9.9%
+        else targetRarity = 3;                   // Эпический ~90%
+      } else if (betTierId === 'rare') {
+        if (roll < 0.00001) targetRarity = 6;    // 0.001%
+        else if (roll < 0.0003) targetRarity = 5;// 0.029%
+        else if (roll < 0.025) targetRarity = 4; // 2.47%
+        else if (roll < 0.13) targetRarity = 3;  // ~10.5%
+        else targetRarity = 2;                   // ~87%
+      } else if (betTierId === 'uncommon') {
+        if (roll < 0.00001) targetRarity = 6;
+        else if (roll < 0.0001) targetRarity = 5;
+        else if (roll < 0.006) targetRarity = 4;
+        else if (roll < 0.05) targetRarity = 3;
+        else if (roll < 0.22) targetRarity = 2;
+        else targetRarity = 1;
+      } else {
+        // Обычная ставка
+        if (roll < 0.000005) targetRarity = 6;   // 1 из 200 000
+        else if (roll < 0.00008) targetRarity = 5;// ~1 из 12 500
+        else if (roll < 0.005) targetRarity = 4; // Легендарный 0.5%
+        else if (roll < 0.035) targetRarity = 3; // Эпический 3.0%
+        else if (roll < 0.16) targetRarity = 2;  // Редкий 12.5%
+        else if (roll < 0.44) targetRarity = 1;  // Необычный 28%
+        else targetRarity = 0;                   // Обычный 56%
+      }
+
+      // Генерация комбинаций символов со строгой логикой атрибутов
+      if (targetRarity === 6) {
+        // СЕКРЕТНЫЙ (6): Абсолютные венцы коллекции на престижных кодах
+        const eliteSecretRegions = [
+          { code: '77', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+          { code: '777', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+          { code: '99', name: 'Москва', isCapital: true, isTop: true, cost: 3000, mult: 1.4 },
+          { code: '78', name: 'Санкт-Петербург', isTop: true, cost: 3000, mult: 1.3 },
+          { code: '716', name: 'Татарстан (Казань)', isTop: true, cost: 3000, mult: 1.25 }
+        ];
+        regionObj = getRandomItem(eliteSecretRegions);
+
+        const secretCombos = [
+          { l: 'АМР', d: '000', note: 'Абсолютный раритет: А000МР на столичном коде' },
+          { l: 'ЕКХ', d: '777', note: 'Культовый Е777КХ ФСО России на трёх топорах' },
+          { l: 'ЕКХ', d: '001', note: 'Первый борт спецслужбы: Е001КХ' },
+          { l: 'ХХХ', d: '000', note: 'Три Икса с тремя нулями: Х000ХХ' },
+          { l: 'ВОР', d: '777', note: 'Коронованный В777ОР на счастливом коде' },
+          { l: 'ААА', d: '000', note: 'Гараж особого назначения: А000АА 000' },
+          { l: 'ССС', d: '777', note: 'Элитные «Три сестры» С777СС на топовом регионе' },
+          { l: 'ЗЛО', d: '666', note: 'Апокалиптический раритет: З666ЛО 666' }
+        ];
+        const pick = getRandomItem(secretCombos);
+        l1 = pick.l[0]; l2 = pick.l[1]; l3 = pick.l[2];
+        d1 = pick.d[0]; d2 = pick.d[1]; d3 = pick.d[2];
+      } else if (targetRarity === 5) {
+        // МИФИЧЕСКИЙ (5): Элитные спецсерии с триплетами или первой десяткой
+        const topRegions = REGIONS.filter(r => r.isTop || r.isCapital);
+        regionObj = getRandomItem(topRegions);
+
+        const mythicVip = getRandomItem(['АМР', 'ЕКХ', 'ВОР', 'ХХХ', 'ССС', 'АМО', 'СКР', 'МММ']);
+        l1 = mythicVip[0]; l2 = mythicVip[1]; l3 = mythicVip[2];
+        if (Math.random() < 0.5) {
+          const rep = getRandomItem(['7', '9', '1', '5']);
+          d1 = rep; d2 = rep; d3 = rep;
+        } else if (Math.random() < 0.8) {
+          d1 = '0'; d2 = '0'; d3 = getRandomItem(['1', '7', '9']);
+        } else {
+          const padded = regionObj.code.padStart(3, '0');
+          d1 = padded[0]; d2 = padded[1]; d3 = padded[2];
+        }
+      } else if (targetRarity === 4) {
+        // ЛЕГЕНДАРНЫЙ (4): Ведомственная серия со стандартными цифрами ИЛИ три нуля без спецсерии
+        const legendaryType = Math.random();
+        if (legendaryType < 0.35) {
+          // Три нуля 000 с обычными буквами (не VIP, чтобы не уходить в мифик)
+          d1 = '0'; d2 = '0'; d3 = '0';
+          const rL = getRandomItem(ALLOWED_LETTERS);
+          l1 = rL; l2 = rL; l3 = rL;
+        } else if (legendaryType < 0.70) {
+          // Ведомственная спецсерия со стандартными неповторяющимися цифрами (например А482МР, Е195КХ)
+          const vipList = ['АМР', 'ЕКХ', 'АМО', 'ООО', 'СКР', 'ААА', 'ВМР', 'МММ'];
+          const v = getRandomItem(vipList);
+          l1 = v[0]; l2 = v[1]; l3 = v[2];
+          // Генерируем обычные цифры, исключая 000 и три одинаковые
+          d1 = Math.floor(Math.random() * 9 + 1).toString();
+          d2 = Math.floor(Math.random() * 10).toString();
+          d3 = Math.floor(Math.random() * 9 + 1).toString();
+          if (d1 === d2 && d2 === d3) d3 = ((parseInt(d3) + 1) % 10).toString();
+        } else {
+          // Одинаковые три буквы серии с красивым круглым числом (например М100ММ, С500СС)
+          const rL = getRandomItem(ALLOWED_LETTERS);
+          l1 = rL; l2 = rL; l3 = rL;
+          d1 = Math.floor(Math.random() * 9 + 1).toString();
+          d2 = '0';
+          d3 = '0';
+        }
+      } else if (targetRarity === 3) {
+        // ЭПИЧЕСКИЙ (3): Три семёрки (777), совпадение с регионом или культовые слова (ХАМ, ТОП, БАН, ЗЛО)
+        if (Math.random() < 0.45) {
+          d1 = '7'; d2 = '7'; d3 = '7';
+        } else if (Math.random() < 0.75) {
+          const padded = regionObj.code.padStart(3, '0');
+          d1 = padded[0]; d2 = padded[1]; d3 = padded[2];
+        } else {
+          const words = ['ХАМ', 'ТОП', 'БАН', 'ЗЛО'];
+          const w = getRandomItem(words);
+          l1 = w[0]; l2 = w[1]; l3 = w[2];
+          const rnd = Math.floor(Math.random() * 9 + 1).toString();
+          d1 = rnd; d2 = rnd; d3 = rnd;
+        }
+      } else if (targetRarity === 2) {
+        // РЕДКИЙ (2): Цифры подряд (123, 234...) или одинаковые три цифры (111, 222... кроме 777)
+        if (Math.random() < 0.5) {
+          const s = Math.floor(Math.random() * 7) + 1;
+          d1 = s.toString(); d2 = (s + 1).toString(); d3 = (s + 2).toString();
+        } else {
+          const poolDigits = ['1', '2', '3', '4', '5', '6', '8', '9'];
+          const r = getRandomItem(poolDigits);
+          d1 = r; d2 = r; d3 = r;
+        }
+      } else if (targetRarity === 1) {
+        // НЕОБЫЧНЫЙ (1): Ноль впереди (005, 069), круглые сотни (100, 200) или зеркалки цифр/букв
+        const pickType = Math.random();
+        if (pickType < 0.35) {
+          d1 = '0';
+          d2 = Math.floor(Math.random() * 9 + 1).toString();
+          d3 = Math.floor(Math.random() * 9 + 1).toString();
+        } else if (pickType < 0.65) {
+          d1 = Math.floor(Math.random() * 9 + 1).toString();
+          d2 = '0';
+          d3 = '0';
+        } else {
+          // Зеркалка цифр
+          const dA = Math.floor(Math.random() * 9 + 1).toString();
+          const dB = Math.floor(Math.random() * 10).toString();
+          d1 = dA; d2 = dB; d3 = dA;
+        }
+      } else {
+        // ОБЫЧНЫЙ (0): Обычные разные цифры, без красивых совпадений
+        d1 = Math.floor(Math.random() * 9 + 1).toString();
+        d2 = Math.floor(Math.random() * 9 + 1).toString();
+        d3 = Math.floor(Math.random() * 9 + 1).toString();
+        while (d1 === d2 && d2 === d3) {
+          d3 = ((parseInt(d3) + 1) % 10).toString();
+        }
+      }
+
+      const digits = `${d1}${d2}${d3}`;
+      const letters = `${l1}${l2}${l3}`;
+
+      // СТРОГАЯ ОЦЕНКА РЕДКОСТИ ПО ФАКТИЧЕСКИМ ПРИЗНАКАМ
+      let determinedRarity = 0;
+      let modifiers = [];
+      let totalMultiplier = 1.0;
+
+      // 1. Проверка на СЕКРЕТНЫЙ (6): Элитные спецсерии + (000 или 777 или 001) на столичном коде
+      if (['АМР', 'ЕКХ', 'ВОР', 'ХХХ', 'ССС', 'ААА', 'ЗЛО'].includes(letters) && 
+          (digits === '000' || digits === '777' || digits === '001' || digits === '666') && 
+          (regionObj.isCapital || regionObj.isTop)) {
+        determinedRarity = targetRarity >= 5 ? 6 : targetRarity;
+      }
+      // 2. Проверка на МИФИЧЕСКИЙ (5): Только если целевая редкость позволяла мифик
+      else if (targetRarity >= 5 && VIP_SERIES[letters] && ((d1 === d2 && d2 === d3) || (d1 === '0' && d2 === '0'))) {
+        determinedRarity = 5;
+      }
+      // 3. Проверка на ЛЕГЕНДАРНЫЙ (4): Три нуля (000) ИЛИ ведомственная/культовая серия номеров ИЛИ одинаковые буквы
+      else if (digits === '000' || VIP_SERIES[letters] || (l1 === l2 && l2 === l3 && (d2 === '0' && d3 === '0'))) {
+        determinedRarity = 4;
+      }
+      // 4. Проверка на ЭПИЧЕСКИЙ (3): Три семёрки (777), совпадение с регионом или культовые слова
+      else if (digits === '777' || digits === '666' || digits === regionObj.code.padStart(3, '0') || ['ХАМ', 'ТОП', 'БАН', 'ЗЛО'].includes(letters)) {
+        determinedRarity = 3;
+      }
+      // 5. Проверка на РЕДКИЙ (2): Три одинаковые цифры или цифры по порядку
+      else if ((d1 === d2 && d2 === d3) || ((parseInt(d2) === parseInt(d1) + 1) && (parseInt(d3) === parseInt(d2) + 1))) {
+        determinedRarity = 2;
+      }
+      // 6. Проверка на НЕОБЫЧНЫЙ (1): Ноль впереди, круглая сотня, зеркалка цифр или зеркалка букв
+      else if (d1 === '0' || (d2 === '0' && d3 === '0') || (d1 === d3) || (l1 === l3)) {
+        determinedRarity = 1;
+      } else {
+        determinedRarity = 0;
+      }
+
+      // Если была куплена ставка с гарантией редкости, гарантируем соответствующий минимальный ранг
+      if (betTierId === 'legendary') determinedRarity = Math.max(determinedRarity, 4);
+      else if (betTierId === 'epic') determinedRarity = Math.max(determinedRarity, 3);
+      else if (betTierId === 'rare') determinedRarity = Math.max(determinedRarity, 2);
+      else if (betTierId === 'uncommon') determinedRarity = Math.max(determinedRarity, 1);
+
+      // ФОРМИРОВАНИЕ МОДИФИКАТОРОВ И МНОЖИТЕЛЕЙ
+      modifiers.push({ text: '🍀 Удача: результат текущей крутки', isAccent: false });
+
+      if (regionObj.isCapital) {
+        totalMultiplier *= regionObj.mult;
+        modifiers.push({ text: `Столичный регион <span class="font-bold text-[#22c55e]">×${regionObj.mult.toFixed(1).replace('.', ',')}</span>`, isAccent: true });
+      }
+
+      if (VIP_SERIES[letters]) {
+        const vip = VIP_SERIES[letters];
+        totalMultiplier *= vip.mult;
+        modifiers.push({ text: `Серия ${letters} (${vip.name}) <span class="font-bold text-[#ffd60a]">×${vip.mult.toFixed(1).replace('.', ',')}</span>`, isAccent: true });
+      }
+
+      if (digits === '000') {
+        totalMultiplier *= 2.5;
+        modifiers.push({ text: `Три нуля (000) <span class="font-bold text-[#ffd60a]">×2,5</span>`, isAccent: true });
+      } else if (digits === '777') {
+        totalMultiplier *= 2.1;
+        modifiers.push({ text: `Три семерки (777) <span class="font-bold text-[#bf5af2]">×2,1</span>`, isAccent: true });
+      } else if (digits === '666') {
+        totalMultiplier *= 1.9;
+        modifiers.push({ text: `Чертова дюжина (666) <span class="font-bold text-rose-500">×1,9</span>`, isAccent: true });
+      } else if (digits === regionObj.code.padStart(3, '0')) {
+        totalMultiplier *= 1.8;
+        modifiers.push({ text: `Цифры совпадают с регионом (${regionObj.code}) <span class="font-bold text-[#bf5af2]">×1,8</span>`, isAccent: true });
+      } else if (d1 === d2 && d2 === d3) {
+        totalMultiplier *= 1.6;
+        modifiers.push({ text: `Три одинаковые цифры (${digits}) <span class="font-bold text-[#0a84ff]">×1,6</span>`, isAccent: true });
+      } else if ((parseInt(d2) === parseInt(d1) + 1) && (parseInt(d3) === parseInt(d2) + 1)) {
+        totalMultiplier *= 1.4;
+        modifiers.push({ text: `Цифры по порядку (${digits}) <span class="font-bold text-[#0a84ff]">×1,4</span>`, isAccent: true });
+      } else if (d1 === '0') {
+        if (d2 === '0') {
+          totalMultiplier *= 1.8;
+          modifiers.push({ text: `Малый номер первой десятки (${digits}) <span class="font-bold text-[#22c55e]">×1,8</span>`, isAccent: true });
+        } else {
+          totalMultiplier *= 1.25;
+          modifiers.push({ text: `Ноль впереди <span class="font-bold text-[#22c55e]">×1,25</span>`, isAccent: true });
+        }
+      } else if (d2 === '0' && d3 === '0') {
+        totalMultiplier *= 1.35;
+        modifiers.push({ text: `Круглая сотня (${digits}) <span class="font-bold text-[#22c55e]">×1,35</span>`, isAccent: true });
+      } else if (d1 === d3 && d1 !== d2) {
+        totalMultiplier *= 1.2;
+        modifiers.push({ text: `Зеркальные цифры (${digits}) <span class="font-bold text-[#22c55e]">×1,2</span>`, isAccent: true });
+      }
+
+      if (l1 === l3) {
+        totalMultiplier *= 1.3;
+        modifiers.push({ text: `Зеркальные буквы серии (${l1}-${l2}-${l3}) <span class="font-bold text-sky-400">×1,3</span>`, isAccent: true });
+      }
+
+      // ЛОГИЧНЫЙ РАСЧЕТ СТОИМОСТИ С УЧЕТОМ ДИАПАЗОНОВ РЕДКОСТИ
+      const info = RARITY_INFO[determinedRarity];
+      let minP = info.minPrice;
+      let maxP = info.maxPrice;
+
+      // Ограничение легендарок для эпической ставки: не выше 1 000 000 ₽
+      if (betTierId === 'epic' && determinedRarity === 4) {
+        maxP = 1000000;
+      }
+
+      // Сбалансированная экономика легендарной ставки (1 000 000 ₽)
+      if (betTierId === 'legendary' && determinedRarity === 4) {
+        const isLuckyProfit = Math.random() < 0.22; // ~22% шанс на окупаемость
+        if (isLuckyProfit) {
+          minP = 1020000;
+          maxP = 1350000;
+        } else {
+          minP = 420000;
+          maxP = 860000; // контролируемый минус, сдерживающий гиперинфляцию
+        }
+      }
+
+      // Расчет цены с учетом мультипликаторов
+      const variance = Math.random();
+      let calculatedPrice = Math.round(minP + (maxP - minP) * variance);
+
+      // Бонус супер-удачи на последнем клевере
+      if (isSuperLuck) {
+        calculatedPrice = Math.round(calculatedPrice * 5);
+        modifiers.unshift({ text: `⚡ Супер-Удача: бонус <span class="font-bold text-amber-300">×5</span> к выигрышу!`, isAccent: true });
+      }
+
+      // Потолок цен по рангам для стабильной экономики
+      if (determinedRarity === 6) calculatedPrice = Math.min(calculatedPrice, 5000000);
+      else if (determinedRarity === 5) calculatedPrice = Math.min(calculatedPrice, 2700000);
+      else if (determinedRarity === 4) calculatedPrice = Math.min(calculatedPrice, 1350000);
+      else if (determinedRarity === 3) calculatedPrice = Math.min(calculatedPrice, 320000);
+      else if (determinedRarity === 2) calculatedPrice = Math.min(calculatedPrice, 75000);
+      else if (determinedRarity === 1) calculatedPrice = Math.min(calculatedPrice, 12000);
+      else calculatedPrice = Math.min(calculatedPrice, 900);
+
+      return {
+        id: Date.now() + Math.random(),
+        l1, d1, d2, d3, l2, l3,
+        digits, letters,
+        region: regionObj,
+        rarity: determinedRarity,
+        price: calculatedPrice,
+        modifiers: modifiers
+      };
+    }
+
+    /* ЭПИЧЕСКАЯ АНИМАЦИЯ ДЛЯ МИФИЧЕСКИХ (5) И СЕКРЕТНЫХ (6) НОМЕРОВ */
+    function triggerHighTierEpicDrop(rarityIndex) {
+      const flash = document.getElementById('screenFlashFX');
+      const plate = document.getElementById('plateOuterGlow');
+      const ambient = document.getElementById('plateAmbientGlowEl');
+
+      if (flash) {
+        flash.classList.remove('hidden', 'flash-overlay');
+        void flash.offsetWidth;
+        flash.classList.add('flash-overlay');
+        setTimeout(() => flash.classList.add('hidden'), 700);
+      }
+
+      if (plate) {
+        plate.classList.add('epic-shockwave-anim');
+        setTimeout(() => plate.classList.remove('epic-shockwave-anim'), 800);
+      }
+
+      // Звуковые триумфальные аккорды Tone.js
+      if (rarityIndex === 6) {
+        // Секретный: космический аккорд
+        playBeep("C4");
+        setTimeout(() => playBeep("G4"), 100);
+        setTimeout(() => playBeep("C5"), 200);
+        setTimeout(() => playBeep("E5"), 300);
+        setTimeout(() => playBeep("B5"), 400);
+        showToast('🌟 СЕКРЕТНЫЙ РАРИТЕТ ВЫБИТ!');
+      } else if (rarityIndex === 5) {
+        // Мифический: мощный бас и фанфара
+        playBeep("D4");
+        setTimeout(() => playBeep("A4"), 120);
+        setTimeout(() => playBeep("D5"), 240);
+        setTimeout(() => playBeep("F#5"), 360);
+        showToast('🔥 МИФИЧЕСКИЙ НОМЕР ВЫПАЛ!');
+      }
+    }
+
+    /* =========================================================
+       ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+       ========================================================= */
+    function updateUI() {
+      document.getElementById('userBalance').textContent = fmt(state.balance);
+      document.getElementById('userLevel').textContent = state.level;
+      
+      const neededXp = state.level * 500;
+      document.getElementById('xpText').textContent = `${state.currentXp}/${neededXp}`;
+      const pct = Math.min(100, Math.round((state.currentXp / neededXp) * 100));
+      document.getElementById('levelProgress').style.width = `${pct}%`;
+
+      // Клеверы
+      const cloverNum = document.getElementById('luckNumber');
+      const badge = document.getElementById('cloverBadge');
+      const banner = document.getElementById('superLuckBanner');
+      const multBadge = document.getElementById('luckMultiplierBadge');
+
+      cloverNum.textContent = state.clovers;
+      if (state.clovers === 1) {
+        badge.classList.add('clover-super-pulse');
+        banner.classList.remove('hidden');
+        multBadge.textContent = 'x5 ⚡';
+        multBadge.className = 'text-[10px] bg-[#ffd60a] text-black font-black px-1.5 py-0.5 rounded-md';
+      } else {
+        badge.classList.remove('clover-super-pulse');
+        banner.classList.add('hidden');
+        multBadge.textContent = 'x1';
+        multBadge.className = 'text-[10px] bg-[#ffd60a] text-black font-black px-1.5 py-0.5 rounded-md';
+      }
+
+      // Кнопка крутки
+      const bet = BET_TIERS.find(b => b.id === state.selectedBetId) || BET_TIERS[0];
+      const singleCost = getBetSingleCost(state.selectedBetId);
+      const totalCost = state.isSpin5x ? singleCost * 5 : singleCost;
+      document.getElementById('spinButtonText').textContent = state.isSpin5x ? 'Крутить ещё ×5' : 'Крутить';
+      document.getElementById('spinButtonPrice').textContent = `${fmt(totalCost)} ₽`;
+      document.getElementById('btnToggleSpinMode').textContent = state.isSpin5x ? '5×' : '1×';
+      document.getElementById('selectedBetText').textContent = bet.title;
+
+      const reg = REGIONS[state.currentRegionIndex] || REGIONS[0];
+      if (reg.isRandom) {
+        document.getElementById('selectedCountryText').textContent = `🇷🇺 Любой регион (2 300 ₽)`;
+      } else {
+        document.getElementById('selectedCountryText').textContent = `Россия · ${reg.code}`;
+      }
+
+      // Гараж бейдж
+      const gBadge = document.getElementById('garageCountBadge');
+      if (state.garage.length > 0) {
+        gBadge.textContent = state.garage.length;
+        gBadge.classList.remove('hidden');
+      } else {
+        gBadge.classList.add('hidden');
+      }
+
+      if (state.currentPlate) {
+        renderCurrentPlate(state.currentPlate);
+      }
+    }
+
+    function renderCurrentPlate(plate) {
+      const setElText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+
+      setElText('plateLetterFirst', plate.l1);
+      setElText('digit1', plate.d1);
+      setElText('digit2', plate.d2);
+      setElText('digit3', plate.d3);
+      setElText('plateLetterSecond', plate.l2);
+      setElText('plateLetterThird', plate.l3);
+      setElText('plateRegion', plate.region.code);
+
+      const rar = RARITY_INFO[plate.rarity] || RARITY_INFO[0];
+      const outerGlow = document.getElementById('plateOuterGlow');
+      if (outerGlow) {
+        outerGlow.className = `plate-outer-frame w-full ${rar.glow} plate-drop-pop`;
+      }
+
+      const rarName = document.getElementById('rarityName');
+      if (rarName) {
+        rarName.innerHTML = `
+          <span>${rar.name}</span>
+          <span id="rarityXpBadge" class="text-[10px] bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded font-mono font-bold">+${rar.xp * (state.isSpin5x ? 5 : 1)} XP</span>
+        `;
+        rarName.style.color = rar.color;
+      }
+
+      const priceStr = `${fmt(plate.price)} ₽`;
+      setElText('platePrice', priceStr);
+
+      // ЦЕННИК НОМЕРА В ЦВЕТ ЕГО РЕДКОСТИ
+      const priceEl = document.getElementById('platePrice');
+      if (priceEl) {
+        priceEl.style.color = rar.color;
+      }
+
+      // 10 сегментов шкалы
+      const bars = document.getElementById('rarityBars');
+      if (bars) {
+        bars.innerHTML = '';
+        for (let i = 0; i < 10; i++) {
+          const d = document.createElement('div');
+          let barColor = i < rar.bars ? 'bg-[#22c55e]' : 'bg-[#2c2c2e]';
+          if (plate.rarity === 6 && i < rar.bars) barColor = 'bg-[#ec4899]';
+          if (plate.rarity === 5 && i < rar.bars) barColor = 'bg-[#ef4444]';
+          if (plate.rarity === 4 && i < rar.bars) barColor = 'bg-[#ffd60a]';
+          if (plate.rarity === 3 && i < rar.bars) barColor = 'bg-[#bf5af2]';
+          if (plate.rarity === 2 && i < rar.bars) barColor = 'bg-[#0a84ff]';
+          if (plate.rarity === 0 && i < rar.bars) barColor = 'bg-[#8e8e93]';
+          d.className = `w-4 h-1.5 rounded-full transition-colors duration-200 ${barColor}`;
+          bars.appendChild(d);
+        }
+      }
+
+      // Адаптивная фоновая подсветка под цвет редкости
+      const ambientGlow = document.getElementById('plateAmbientGlowEl');
+      if (ambientGlow) {
+        if (plate.rarity === 6) {
+          ambientGlow.style.background = 'radial-gradient(circle 240px at center, rgba(236, 72, 153, 0.45) 0%, rgba(147, 51, 234, 0.25) 50%, transparent 80%)';
+        } else if (plate.rarity === 5) {
+          ambientGlow.style.background = 'radial-gradient(circle 240px at center, rgba(239, 68, 68, 0.4) 0%, rgba(185, 28, 28, 0.18) 50%, transparent 80%)';
+        } else if (plate.rarity === 4) {
+          ambientGlow.style.background = 'radial-gradient(circle 240px at center, rgba(255, 214, 10, 0.35) 0%, rgba(202, 138, 4, 0.12) 50%, transparent 80%)';
+        } else if (plate.rarity === 3) {
+          ambientGlow.style.background = 'radial-gradient(circle 240px at center, rgba(191, 90, 242, 0.35) 0%, rgba(147, 51, 234, 0.12) 50%, transparent 80%)';
+        } else if (plate.rarity === 2) {
+          ambientGlow.style.background = 'radial-gradient(circle 240px at center, rgba(10, 132, 255, 0.35) 0%, rgba(29, 78, 216, 0.12) 50%, transparent 80%)';
+        } else {
+          ambientGlow.style.background = 'radial-gradient(circle 240px at center, rgba(34, 197, 94, 0.22) 0%, rgba(16, 75, 32, 0.08) 50%, transparent 80%)';
+        }
+      }
+
+      setElText('regionSubtext', `Регион ${plate.region.code} · ${plate.region.name}`);
+
+      // ДИНАМИЧЕСКИЙ СПИСОК МНОЖИТЕЛЕЙ (ОБНОВЛЯЕТСЯ КАЖДЫЙ ПРОКРУТ)
+      const list = document.getElementById('modifiersList');
+      if (list) {
+        list.innerHTML = '';
+        if (Array.isArray(plate.modifiers)) {
+          plate.modifiers.forEach(m => {
+            const row = document.createElement('div');
+            row.className = m.isAccent ? 'text-[#22c55e] font-semibold' : 'text-[#8e8e93]';
+            row.innerHTML = m.text;
+            list.appendChild(row);
+          });
+        }
+      }
+
+      // Состояние кнопок гаража и авто-продажи
+      const btnSave = document.getElementById('btnSaveToGarage');
+      const savedBadge = document.getElementById('garageSavedBadge');
+      const autoNotice = document.getElementById('autoSellNotice');
+
+      if (state.isCurrentSavedToGarage) {
+        if (btnSave) btnSave.classList.add('hidden');
+        if (savedBadge) savedBadge.classList.remove('hidden');
+        if (autoNotice) {
+          autoNotice.innerHTML = `Номер <span class="text-emerald-400 font-bold">в гараже</span>. Авто-продажа отменена.`;
+        }
+      } else {
+        if (btnSave) btnSave.classList.remove('hidden');
+        if (savedBadge) savedBadge.classList.add('hidden');
+        if (autoNotice) {
+          autoNotice.innerHTML = `Этот номер продастся за <span id="sellPriceNote" class="font-bold font-mono" style="color: ${rar.color}">${priceStr}</span> при следующем крутке`;
+        }
+      }
+    }
+
+    function addXp(amount) {
+      state.currentXp += amount;
+      let needed = state.level * 500;
+      while (state.currentXp >= needed) {
+        state.currentXp -= needed;
+        state.level += 1;
+        // Сбалансированная выплата за новый уровень (чтобы не перенасыщать баланс)
+        const levelBonus = 5000 * state.level;
+        state.balance += levelBonus;
+        needed = state.level * 500;
+        showToast(`🎉 НОВЫЙ УРОВЕНЬ ${state.level}! Премия +${fmt(levelBonus)} ₽`);
+        playBeep("G5");
+      }
+    }
+
+    /* =========================================================
+       ПРОКРУТКА, АВТО-ПРОДАЖА И ЗАЩИТА ОТ ДЮПА
+       ========================================================= */
+    function spin() {
+      if (state.isRolling) return;
+      initAudio();
+
+      const singleCost = getBetSingleCost(state.selectedBetId);
+      const spinCost = state.isSpin5x ? singleCost * 5 : singleCost;
+
+      if (state.balance < spinCost) {
+        showToast('Недостаточно рублей на балансе!');
+        return;
+      }
+
+      // ТРЕБОВАНИЕ 3: Авто-продажа предыдущего номера при следующем прокруте (если не нажат «В гараж»)
+      if (!state.isSpin5x && state.currentPlate && !state.isCurrentSavedToGarage && !state.isCurrentSold) {
+        const autoSellSum = state.currentPlate.price;
+        state.balance += autoSellSum;
+        playCoin();
+        showBalanceDelta(autoSellSum, true);
+        state.isCurrentSold = true;
+      }
+
+      // Списание стоимости
+      state.balance -= spinCost;
+      showBalanceDelta(spinCost, false);
+
+      // Расход клеверов
+      if (state.isSpin5x) {
+        state.clovers = Math.max(1, state.clovers - 5);
+      } else {
+        if (state.clovers <= 1) {
+          state.clovers = 100;
+        } else {
+          state.clovers -= 1;
+        }
+      }
+
+      state.isRolling = true;
+      state.isCurrentSavedToGarage = false;
+      state.isCurrentSold = false;
+
+      const spinBtn = document.getElementById('btnSpin');
+      const plateContainer = document.getElementById('licensePlateContainer');
+      spinBtn.disabled = true;
+      spinBtn.classList.add('opacity-75');
+      plateContainer.classList.add('slot-rolling');
+
+      const currentBet = BET_TIERS.find(b => b.id === state.selectedBetId) || BET_TIERS[0];
+
+      // Анимация барабана
+      let ticks = 0;
+      const interval = setInterval(() => {
+        ticks++;
+        playBeep("A4");
+        document.getElementById('plateLetterFirst').textContent = getRandomItem(ALLOWED_LETTERS);
+        document.getElementById('digit1').textContent = Math.floor(Math.random() * 10);
+        document.getElementById('digit2').textContent = Math.floor(Math.random() * 10);
+        document.getElementById('digit3').textContent = Math.floor(Math.random() * 10);
+        document.getElementById('plateLetterSecond').textContent = getRandomItem(ALLOWED_LETTERS);
+        document.getElementById('plateLetterThird').textContent = getRandomItem(ALLOWED_LETTERS);
+
+        if (ticks >= 14) {
+          clearInterval(interval);
+          finishSpin(currentBet.minRarity);
+        }
+      }, 45);
+    }
+
+    function finishSpin(minRarity) {
+      const plateContainer = document.getElementById('licensePlateContainer');
+      plateContainer.classList.remove('slot-rolling');
+
+      if (state.isSpin5x) {
+        // Режим 5 номеров
+        const plates = [];
+        for (let i = 0; i < 5; i++) {
+          const p = generatePlateWithDynamicModifiers(state.selectedBetId);
+          p.isSold = false;
+          plates.push(p);
+        }
+
+        // Лучший выводится на главный экран
+        let best = plates[0];
+        plates.forEach(p => { if (p.price > best.price) best = p; });
+
+        state.currentPlate = best;
+        state.pendingSpin5List = plates;
+        renderCurrentPlate(best);
+
+        // Кинематографический триггер для высших рангов
+        if (best.rarity >= 5) {
+          triggerHighTierEpicDrop(best.rarity);
+        }
+
+        let totalXp = 0;
+        plates.forEach(p => totalXp += RARITY_INFO[p.rarity].xp);
+        addXp(totalXp);
+
+        renderSpin5Modal();
+        openModal('modalSpin5');
+      } else {
+        // Одиночный номер
+        const singlePlate = generatePlateWithDynamicModifiers(state.selectedBetId);
+        state.currentPlate = singlePlate;
+        renderCurrentPlate(singlePlate);
+
+        // Кинематографический триггер для высших рангов
+        if (singlePlate.rarity >= 5) {
+          triggerHighTierEpicDrop(singlePlate.rarity);
+        }
+
+        addXp(RARITY_INFO[singlePlate.rarity].xp);
+        playBeep("D5");
+      }
+
+      state.isRolling = false;
+      const spinBtn = document.getElementById('btnSpin');
+      spinBtn.disabled = false;
+      spinBtn.classList.remove('opacity-75');
+      
+      updateUI();
+      saveState();
+    }
+
+    // ТРЕБОВАНИЕ 4: Защита от дюпа — строго 1 раз
+    function saveCurrentToGarage() {
+      if (!state.currentPlate) return;
+      if (state.isCurrentSavedToGarage) {
+        showToast('Этот номер уже находится в гараже!');
+        return;
+      }
+      if (state.isCurrentSold) {
+        showToast('Нельзя сохранить проданный номер!');
+        return;
+      }
+
+      state.garage.unshift({ ...state.currentPlate, id: Date.now() });
+      state.isCurrentSavedToGarage = true;
+      playBeep("C6");
+      showToast('Номер успешно сохранён в гараж! Авто-продажа отменена.');
+      
+      renderCurrentPlate(state.currentPlate);
+      updateUI();
+      saveState();
+    }
+
+    /* МОДАЛКА 5Х ПРОКРУТКИ */
+    function renderSpin5Modal() {
+      const container = document.getElementById('spin5ListContainer');
+      container.innerHTML = '';
+
+      state.pendingSpin5List.forEach((p, idx) => {
+        const rar = RARITY_INFO[p.rarity];
+        const row = document.createElement('div');
+        row.className = `bg-[#2c2c2e] border ${p.isSold ? 'border-white/5 opacity-50' : 'border-[#3a3a3c]'} rounded-2xl p-3 flex items-center justify-between shadow-sm`;
+        
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="px-2.5 py-1 bg-white text-black font-black font-plate text-sm rounded border border-black leading-none flex items-center">
+              <span>${p.l1}${p.digits}${p.l2}${p.l3}</span>
+              <span class="border-l border-black ml-1.5 pl-1.5 text-[11px] font-sans">${p.region.code}</span>
+            </div>
+            <div>
+              <div class="text-xs font-black" style="color: ${rar.color}">${rar.name}</div>
+              <div class="text-xs font-bold text-[#22c55e] font-mono">${fmt(p.price)} ₽</div>
+            </div>
+          </div>
+          <div>
+            ${p.isSold 
+              ? `<span class="text-xs text-[#8e8e93] font-bold">Продано</span>`
+              : `<button onclick="sellSpin5Item(${idx})" class="text-xs px-3 py-1.5 rounded-xl bg-[#22c55e]/20 text-[#22c55e] hover:bg-[#22c55e]/30 font-extrabold active:scale-95 transition">Продать</button>`
+            }
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function sellSpin5Item(idx) {
+      const item = state.pendingSpin5List[idx];
+      if (!item || item.isSold) return;
+
+      item.isSold = true;
+      state.balance += item.price;
+      showBalanceDelta(item.price, true);
+      playCoin();
+      renderSpin5Modal();
+      updateUI();
+      saveState();
+    }
+
+    function sellAllSpin5Remaining() {
+      let earned = 0;
+      state.pendingSpin5List.forEach(p => {
+        if (!p.isSold) {
+          p.isSold = true;
+          earned += p.price;
+        }
+      });
+      if (earned > 0) {
+        state.balance += earned;
+        showBalanceDelta(earned, true);
+        playCoin();
+        showToast(`Все номера проданы за +${fmt(earned)} ₽!`);
+      }
+      renderSpin5Modal();
+      updateUI();
+      saveState();
+    }
+
+    function finishSpin5Modal() {
+      let saved = 0;
+      state.pendingSpin5List.forEach(p => {
+        if (!p.isSold) {
+          state.garage.unshift({ ...p, id: Date.now() + Math.random() });
+          saved++;
+        }
+      });
+      if (saved > 0) {
+        showToast(`Сохранено в гараж: ${saved} шт.`);
+      }
+      closeModal('modalSpin5');
+      state.pendingSpin5List = [];
+      updateUI();
+      saveState();
+    }
+
+    /* ГАРАЖ */
+    function openGarageModal() {
+      const container = document.getElementById('garageListContainer');
+      container.innerHTML = '';
+
+      if (state.garage.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-[#8e8e93] text-xs">
+            <i data-lucide="warehouse" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+            Гараж пока пуст. Выбивайте номера и машины!
+          </div>
+        `;
+      } else {
+        state.garage.forEach((item, idx) => {
+          const card = document.createElement('div');
+          card.className = 'bg-[#2c2c2e] border border-[#3a3a3c] rounded-2xl p-3 flex items-center justify-between shadow-sm';
+          
+          if (item.type === 'car') {
+            // Карточка автомобиля
+            const rar = CAR_RARITIES[item.rarity] || CAR_RARITIES.common;
+            card.innerHTML = `
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-black/40 flex items-center justify-center text-xl shrink-0">
+                  🚗
+                </div>
+                <div>
+                  <div class="text-xs font-black text-white">${item.name}</div>
+                  <div class="text-[10px] font-bold" style="color: ${rar.color}">${rar.name} · ${item.containerName || 'Контейнер'}</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="text-xs font-bold text-[#22c55e] font-mono">${fmt(item.price)} ₽</div>
+                <button onclick="sellFromGarage(${idx})" class="text-[11px] px-2.5 py-1 bg-[#22c55e]/20 text-[#22c55e] font-bold rounded-xl active:scale-95 transition">
+                  Продать
+                </button>
+              </div>
+            `;
+          } else {
+            // Карточка номерного знака
+            const rar = RARITY_INFO[item.rarity] || RARITY_INFO[0];
+            card.innerHTML = `
+              <div class="flex items-center gap-3">
+                <div class="px-2.5 py-1 bg-white text-black font-black font-plate text-sm rounded border border-black leading-none">
+                  ${item.l1}${item.digits}${item.l2}${item.l3} <span class="border-l border-black pl-1 text-[11px] font-sans">${item.region.code}</span>
+                </div>
+                <div>
+                  <div class="text-xs font-black" style="color: ${rar.color}">${rar.name}</div>
+                  <div class="text-[10px] text-[#8e8e93]">${item.region.name}</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div class="text-xs font-bold text-[#22c55e] font-mono">${fmt(item.price)} ₽</div>
+                <button onclick="sellFromGarage(${idx})" class="text-[11px] px-2.5 py-1 bg-[#22c55e]/20 text-[#22c55e] font-bold rounded-xl active:scale-95 transition">
+                  Продать
+                </button>
+              </div>
+            `;
+          }
+          container.appendChild(card);
+        });
+      }
+
+      openModal('garageModal');
       lucide.createIcons();
-      updateAllViews();
-      setTimeout(() => openOutageModal(), 400);
-    });
+    }
+
+    function sellFromGarage(idx) {
+      const item = state.garage[idx];
+      if (!item) return;
+      state.garage.splice(idx, 1);
+      state.balance += item.price;
+      showBalanceDelta(item.price, true);
+      playCoin();
+      openGarageModal();
+      updateUI();
+      saveState();
+    }
+
+    function sellAllGarage() {
+      if (state.garage.length === 0) return;
+      let total = 0;
+      state.garage.forEach(g => total += g.price);
+      state.balance += total;
+      state.garage = [];
+      showBalanceDelta(total, true);
+      playCoin();
+      showToast(`Гараж продан за +${fmt(total)} ₽!`);
+      openGarageModal();
+      updateUI();
+      saveState();
+    }
+
+    /* МОДАЛКИ СТАВОК И СТРАН */
+    function renderBetModal() {
+      const container = document.getElementById('betOptionsContainer');
+      container.innerHTML = '';
+      BET_TIERS.forEach(tier => {
+        const isSel = tier.id === state.selectedBetId;
+        const singleCost = getBetSingleCost(tier.id);
+        const cost = state.isSpin5x ? singleCost * 5 : singleCost;
+        const row = document.createElement('div');
+        row.className = `p-3.5 rounded-2xl border transition cursor-pointer flex items-center justify-between ${isSel ? 'bg-[#2c2c2e] border-[#22c55e]' : 'bg-[#242426] border-[#3a3a3c]'}`;
+        row.innerHTML = `
+          <div>
+            <div class="text-sm font-extrabold ${tier.color}">${tier.title}</div>
+            <div class="text-xs text-[#8e8e93] mt-0.5">${tier.subtitle}</div>
+          </div>
+          <div class="text-sm font-black text-white font-mono">${fmt(cost)} ₽</div>
+        `;
+        row.onclick = () => {
+          state.selectedBetId = tier.id;
+          closeModal('betModal');
+          updateUI();
+          saveState();
+        };
+        container.appendChild(row);
+      });
+    }
+
+    let regionSearchQuery = '';
+
+    function renderCountryModal() {
+      const list = document.getElementById('countryOptionsList');
+      list.innerHTML = '';
+
+      // Добавим поле быстрого поиска по регионам в шапку модалки
+      let searchInput = document.getElementById('regionSearchInput');
+      if (!searchInput) {
+        const searchWrapper = document.createElement('div');
+        searchWrapper.className = 'mb-2 relative';
+        searchWrapper.innerHTML = `
+          <input id="regionSearchInput" type="text" placeholder="Поиск по коду или городу..." value="${regionSearchQuery}" 
+            class="w-full bg-[#141416] border border-[#2c2c2e] focus:border-[#22c55e] text-white text-xs rounded-xl px-3.5 py-2.5 outline-none placeholder:text-[#8e8e93]">
+        `;
+        list.parentElement.insertBefore(searchWrapper, list);
+        searchInput = document.getElementById('regionSearchInput');
+        searchInput.addEventListener('input', (e) => {
+          regionSearchQuery = e.target.value.toLowerCase().trim();
+          renderCountryModal();
+        });
+      }
+
+      const filtered = REGIONS.map((reg, idx) => ({ reg, idx })).filter(({ reg }) => {
+        if (!regionSearchQuery) return true;
+        return reg.code.toLowerCase().includes(regionSearchQuery) || reg.name.toLowerCase().includes(regionSearchQuery);
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="text-center py-6 text-xs text-[#8e8e93]">Регион не найден</div>`;
+        return;
+      }
+
+      filtered.forEach(({ reg, idx }) => {
+        const isSel = idx === state.currentRegionIndex;
+        const item = document.createElement('div');
+        item.className = `p-3 rounded-2xl border transition cursor-pointer flex items-center justify-between ${isSel ? 'bg-[#2c2c2e] border-[#22c55e]' : 'bg-[#242426] border-[#3a3a3c]'}`;
+        
+        let priceBadge = `<span class="text-xs font-mono font-bold text-[#8e8e93]">${fmt(reg.cost)} ₽</span>`;
+        if (reg.isRandom) {
+          priceBadge = `<span class="text-xs font-mono font-black text-[#22c55e]">2 300 ₽ (Выгода)</span>`;
+        } else if (reg.isTop) {
+          priceBadge = `<span class="text-xs font-mono font-bold text-amber-400">3 000 ₽ (Топ)</span>`;
+        }
+
+        item.innerHTML = `
+          <div class="flex items-center gap-2.5 truncate">
+            <span class="text-lg">${reg.isRandom ? '🎲' : '🇷🇺'}</span>
+            <div class="truncate">
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>${reg.isRandom ? reg.name : `Регион ${reg.code} · ${reg.name}`}</span>
+              </div>
+              <div class="text-[10px] text-[#8e8e93]">${reg.isRandom ? 'Случайный регион при каждой крутке' : (reg.isTop ? 'Столичный / Топ регион (множитель повышен)' : 'Стандартный регион')}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0 ml-2">
+            ${priceBadge}
+            ${isSel ? '<i data-lucide="check" class="w-4 h-4 text-[#22c55e]"></i>' : ''}
+          </div>
+        `;
+        item.onclick = () => {
+          state.currentRegionIndex = idx;
+          closeModal('countryModal');
+          updateUI();
+          saveState();
+        };
+        list.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    function toggleSpinMode() {
+      state.isSpin5x = !state.isSpin5x;
+      updateUI();
+      saveState();
+    }
+
+    function addShopBonus() {
+      // Снижен магазинный бонус с 50 000 до 15 000 ₽ для поддержания баланса экономики
+      state.balance += 15000;
+      showBalanceDelta(15000, true);
+      playCoin();
+      showToast('Начислен бонус из магазина +15 000 ₽!');
+      updateUI();
+      saveState();
+    }
+
+    function shareCurrentPlate() {
+      if (!state.currentPlate) return;
+      const text = `Смотри, какой номер мне выпал: ${state.currentPlate.l1}${state.currentPlate.digits}${state.currentPlate.l2}${state.currentPlate.l3} ${state.currentPlate.region.code} за ${fmt(state.currentPlate.price)} ₽!`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text);
+        showToast('Текст скопирован!');
+      } else {
+        showToast(text);
+      }
+    }
+
+    function resetProgress() {
+      localStorage.removeItem('plates_game_v5');
+      state.level = 1;
+      state.currentXp = 0;
+      state.balance = 100000;
+      state.clovers = 100;
+      state.garage = [];
+      state.isCurrentSavedToGarage = false;
+      state.isCurrentSold = false;
+      state.currentPlate = generatePlateWithDynamicModifiers('common');
+      showToast('Прогресс сброшен: Баланс 100 000 ₽, 100 клеверов!');
+      updateUI();
+    }
+
+    function openModal(id) {
+      if (id === 'betModal') renderBetModal();
+      if (id === 'countryModal') renderCountryModal();
+      document.getElementById(id)?.classList.remove('hidden');
+    }
+    window.openModal = openModal;
+
+    function closeModal(id) {
+      document.getElementById(id)?.classList.add('hidden');
+    }
+    window.closeModal = closeModal;
+
+    // Явная привязка функций к window для корректной работы в inline onclick обработчиках
+    window.switchAppTab = switchAppTab;
+    window.openContainerInfoModal = openContainerInfoModal;
+    window.triggerContainerOpenProcess = triggerContainerOpenProcess;
+    window.sellRouletteDroppedCar = sellRouletteDroppedCar;
+    window.garageRouletteDroppedCar = garageRouletteDroppedCar;
+    window.spin = spin;
+    window.saveCurrentToGarage = saveCurrentToGarage;
+    window.shareCurrentPlate = shareCurrentPlate;
+    window.toggleSpinMode = toggleSpinMode;
+    window.addShopBonus = addShopBonus;
+    window.openGarageModal = openGarageModal;
+    window.sellFromGarage = sellFromGarage;
+    window.sellAllGarage = sellAllGarage;
+    window.sellSpin5Item = sellSpin5Item;
+    window.sellAllSpin5Remaining = sellAllSpin5Remaining;
+    window.finishSpin5Modal = finishSpin5Modal;
+    window.showToast = showToast;
+    window.resetProgress = resetProgress;
+
+    window.onload = function() {
+      loadState();
+      lucide.createIcons();
+      state.currentPlate = generatePlateWithDynamicModifiers('common');
+      updateUI();
+    };
   </script>
 </body>
 </html>
